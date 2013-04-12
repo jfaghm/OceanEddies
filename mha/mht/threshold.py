@@ -209,17 +209,3 @@ def threshold(ssh, areamap, lons, lats, cyc, spixels, base_th, index):
 			thresh_found,
 			amplitudes[ii]))
 	return eddies
-
-#sf = h5py.File('/project/expeditions/eddies_project_data/ssh_data/data/global_ssh_180lon_1992_2011.mat', 'r')
-#mat = scipy.io.loadmat('/project/expeditions/eddies_project_data/results/global_results/no_objs/oct7/anticyc_19921014.mat', struct_as_record=False)
-#quadmat = scipy.io.loadmat('/project/expeditions/eddies_project_data/ssh_data/data/quadrangle_area_by_lat.mat', struct_as_record=False)
-#areamap = quadmat['areamap'][0]
-#
-#ssh = sf['ssh'][0][...]
-#lats = sf['lat'][...]
-#lons = sf['lon'][...]
-#pixellist = mat['eddies'][0,1060].Stats[0,0].PixelIdxList[:,0]
-#base_thresh = mat['eddies'][0,1060].ThreshFound[0,0]
-#
-#for a in threshold(ssh, areamap, lons, lats, -1, pixellist, base_thresh):
-#	print a.lat, a.lon, a.surf_area, a.pixelidxlist
