@@ -1,29 +1,22 @@
-OceanEddies
-===========
-
+# OceanEddies
 A collection of algorithms to autonomously identify and track mesoscale ocean eddies in sea surface height (SSH) satellite data
 
-Eddyscan
-=========
+## Eddyscan
 An eddy identification algorithm that utilizes thresholding to detect eddies in SSH data.
 
-Requirements
-------------
+### Requirements
  + Matlab
 
-Example Usage
--------------
+### Example Usage
 ```matlab
 % Find all anticyclonic eddies
 eddies = eddyscan_single(ssh_slice, lat, lon, 1);
 ```
 
-MHA
-=========
+## MHA
 A tracking algorithm that maintains multiple hypothesis and does n-scan pruning. MHA is capable of splitting artificially merged eddies (detected by Eddyscan or otherwise) and can allow eddies to disappear for one timestep from the data to avoid breaking tracks.
 
-Requirements
-------------
+### Requirements
  + Python
  + Cython
  + Skimage
@@ -31,12 +24,10 @@ Requirements
  + Scipy
  + H5py
 
-Build
------
+### Build
 To build MHA, run ```python setup.py build_ext -b mht```
 
-Running MHA
------------
+### Example Usage
 ```python
 import mht
 
