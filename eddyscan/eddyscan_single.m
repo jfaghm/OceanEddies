@@ -14,7 +14,7 @@ ssh_extended(:,1:200) = ssh_data(:,(end-199):end);
 ssh_extended(:,201:(size(ssh_data,2)+200)) = ssh_data;
 ssh_extended(:,(201+size(ssh_data,2)):end) = ssh_data(:,1:200);
 
-areamap = load('/project/expeditions/eddies_project_data/ssh_data/data/quadrangle_area_by_lat.mat');
+areamap = load('../data/quadrangle_area_by_lat.mat');
 areamap = areamap.areamap;
 
 mask = ones(size(ssh_extended));
