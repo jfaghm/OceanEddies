@@ -10,6 +10,9 @@ An eddy identification algorithm that utilizes thresholding to detect eddies in 
 ### Example Usage
 ```matlab
 % Find all anticyclonic eddies
+ssh_slice = ncread('ssh_data.nc', 'Grid_0001');
+lat = ncread('ssh_data.nc', 'NbLatitudes');
+lon = ncread('ssh_data.nc', 'NbLongitudes');
 eddies = eddyscan_single(ssh_slice, lat, lon, 1);
 ```
 
