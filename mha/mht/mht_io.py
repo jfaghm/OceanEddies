@@ -15,7 +15,7 @@ def load_tracks(src, timesteps):
 		parent = None
 		for i in range(track.shape[0]):
 			pixels = track[i,9:]
-			pixels = pixels[np.isnan(pixels)]
+			pixels = pixels[pixels > -1]
 			eddy = Eddy(track[i,0], track[i,1], track[i,5], pixels, track[i,7],
 				track[i,6])
 			eddy.id = '[' + timesteps[int(track[i,2])-1] + ' ' + str(i+1) + ']'
@@ -71,7 +71,7 @@ def write_tracks(roots, dest, timesteps, prune_depth, closest, gate_dist = 150):
 					dtype=np.float64))
 				max_len = max(max_len, len(all_tracks[i][j].obj.pixelidxlist) + 8)
 		eddies_track_np = np.empty((len(eddy_track),max_len+1), dtype=np.float64)
-		eddies_track_np[:] = np.NAN
+		eddies_track_np[:] = -1
 		for j in range(len(eddy_track)):
 			eddies_track_np[j,:len(eddy_track[j])] = eddy_track[j]
 		eddies_tracks[i] = eddies_track_np
