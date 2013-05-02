@@ -27,18 +27,6 @@ def trans_coords(shape, top, left, pairs):
 	pairs[1,:] += left
 	pairs[0,:] %= shape[0]
 
-def trans_lonlat(lons, lats, pairs):
-	"""
-	Returns an array containing [lon, lat] coords cooresponding to [y,x] in 'pairs'
-
-	NOTE: Expects coordinates as corresponding to [lon, lat]!
-	"""
-	lonlat = np.zeros(pairs.shape, dtype=np.float64)
-	for ii in range(pairs.shape[1]):
-		lonlat[0,ii] = lons[0,pairs[0,ii]]
-		lonlat[1,ii] = lats[0,pairs[1,ii]]
-	return lonlat
-
 def trans_lonlat_nonint(lons, lats, pairs):
 	"""
 	Returns an array containing [lon, lat] coords cooresponding to [y,x] in 'pairs'
