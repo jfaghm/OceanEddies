@@ -39,6 +39,27 @@ def trans_lonlat(lons, lats, pairs):
 		lonlat[1,ii] = lats[0,pairs[1,ii]]
 	return lonlat
 
+def trans_lonlat_nonint(lons, lats, pairs):
+	"""
+	Returns an array containing [lon, lat] coords cooresponding to [y,x] in 'pairs'
+	This correctly handles floating point coordinates
+
+	NOTE: Expects coordinates as corresponding to [lon, lat]!
+	"""
+	lonlat = np.zeros(pairs.shape, dtype=np.float64)
+	fpairs = np.floor(pairs)
+	cpairs = np.ceil(pairs)
+	for ii in range(pairs.shape[1]):
+		lonf = lons[0,fpairs[0,ii]]
+		lonc = lons[0,cpairs[0,ii]]
+		lon = lonf + (lonc-lonf)*(pairs[0,ii]-fpairs[0,ii])
+		latf = lats[0,fpairs[1,ii]]
+		latc = lats[0,cpairs[1,ii]]
+		lat = latf + (latc-latf)*(pairs[1,ii]-fpairs[1,ii])
+		lonlat[0,ii] = lon
+		lonlat[1,ii] = lat
+	return lonlat
+
 def trans_linear(shape, pairs):
 	"""
 	Returns an array containing the linear values of the pixels in pairs.
@@ -53,13 +74,12 @@ def trans_linear(shape, pairs):
 
 def find_centroid(canvas):
 	# x refers to the second dim and y refers to to the first for consistency
-	sum_x = 0
-	sum_y = 0
-	length = len(canvas.flatten())
-	for ii in range(canvas.shape[0]):
-		for jj in range(canvas.shape[1]):
-			sum_x += jj
-			sum_y += ii
+	sum_x = 0.0
+	sum_y = 0.0
+	length = canvas.shape[1]
+	for i in range(canvas.shape[1]):
+		sum_x += canvas[0][i]
+		sum_y += canvas[1][i]
 	return (sum_x/length, sum_y/length)
 
 def find_surfarea(areamap, pixels):
@@ -199,7 +219,7 @@ def threshold(ssh, areamap, lons, lats, cyc, spixels, base_th, index):
 		raw_pixels[i] = trans_linear(ssh_32.shape, pixels[i])
 		surfareas[i] = find_surfarea(areamap, pixels[i])
 	trans_coords(ssh_32.shape, top, left, centroids)
-	lonlat_centroids = trans_lonlat(lons, lats, centroids)
+	lonlat_centroids = trans_lonlat_nonint(lons, lats, centroids)
 	eddies = []
 	for ii in range(lonlat_centroids.shape[1]):
 		eddies.append(Eddy(lonlat_centroids[1,ii],
