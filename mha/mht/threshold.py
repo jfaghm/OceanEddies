@@ -27,23 +27,22 @@ def trans_coords(shape, top, left, pairs):
 	pairs[1,:] += left
 	pairs[0,:] %= shape[0]
 
-def trans_lonlat_nonint(lons, lats, pairs):
+def trans_lonlat(londim, latdim, pairs):
 	"""
 	Returns an array containing [lon, lat] coords cooresponding to [y,x] in 'pairs'
 	This correctly handles floating point coordinates
 
+	Expects longitudinal values to go from 0 to 179.xx then -180 to -0.xx
+
 	NOTE: Expects coordinates as corresponding to [lon, lat]!
 	"""
 	lonlat = np.zeros(pairs.shape, dtype=np.float64)
-	fpairs = np.floor(pairs)
-	cpairs = np.ceil(pairs)
 	for ii in range(pairs.shape[1]):
-		lonf = lons[0,fpairs[0,ii]]
-		lonc = lons[0,cpairs[0,ii]]
-		lon = lonf + (lonc-lonf)*(pairs[0,ii]-fpairs[0,ii])
-		latf = lats[0,fpairs[1,ii]]
-		latc = lats[0,cpairs[1,ii]]
-		lat = latf + (latc-latf)*(pairs[1,ii]-fpairs[1,ii])
+		if pairs[0,ii] < (londim / 2):
+			lon = pairs[0,ii] * 180.0 / (londim/2.0)
+		else:
+			lon = ((pairs[0,ii]-(londim/2.0)) * 180.0 / (londim/2.0)) - 180.0
+		lat = (pairs[1,ii] * 180.0 / (latdim-1)) - 90.0 # go from 0-latdim to 0-180 to -90 to 90
 		lonlat[0,ii] = lon
 		lonlat[1,ii] = lat
 	return lonlat
@@ -207,7 +206,7 @@ def threshold(ssh, areamap, lons, lats, cyc, spixels, base_th, index):
 		raw_pixels[i] = trans_linear(ssh_32.shape, pixels[i])
 		surfareas[i] = find_surfarea(areamap, pixels[i])
 	trans_coords(ssh_32.shape, top, left, centroids)
-	lonlat_centroids = trans_lonlat_nonint(lons, lats, centroids)
+	lonlat_centroids = trans_lonlat(lons.shape[1], lats.shape[1], centroids)
 	eddies = []
 	for ii in range(lonlat_centroids.shape[1]):
 		eddies.append(Eddy(lonlat_centroids[1,ii],
