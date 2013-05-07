@@ -141,6 +141,7 @@ def build_mht(eddies_data,
 	do_correction = False,
 	gate_dist = 150,
 	prev_data = None,
+	merges_dest = None,
 	prune_mode = 'parent'):
 	"""
 	Build the multi-hypothesis tree. Returns an (closest, roots) where both are iterators.
@@ -163,6 +164,8 @@ def build_mht(eddies_data,
 	roots = []
 	closest = [] # Used for storing the closest eddy if one is not found
 	depth = 0
+	p_merges = []
+	certain_merges_mask = []
 
 	if prev_data is not None:
 		roots = prev_data['roots']
@@ -221,13 +224,28 @@ def build_mht(eddies_data,
 						eddy.pixelidxlist,
 						eddy.thresh,
 						eddy.id)
+					tmp = []
+					for E in [eddy] + new_eddies:
+						tmp.append(np.array([(E.lat,
+							E.lon,
+							depth+1,
+							E.pixelidxlist)],
+							[('lat', 'float64'),
+							('lon', 'float64'),
+							('dateIndex', 'int32'),
+							('pixels', 'object')]))
+					p_merges.append(np.array([(tmp[0], tmp[1:])],
+						[('old', 'object'), ('new', 'object')]))
 					if len(new_eddies) > 1:
+						certain_merges_mask.append(True)
 						merged += new_eddies
 						for instance in instances:
 							if child_score[instance][1] is None:
 								roots.remove(instance)
 							else:
 								child_score[instance][1].remove_child(instance)
+					else:
+						certain_merges_mask.append(False)
 			for neweddy in merged:
 				mk_node_and_add(neweddy, depth, pnodes, roots, gate_dist)
 
@@ -241,5 +259,15 @@ def build_mht(eddies_data,
 				prune(roots, depth-prune_depth, gate_dist)
 		depth += 1
 		print 'time:', time.mktime(time.localtime())-start_time
+
+	# Write merges
+	if merges_dest is not None:
+		certain_mask_np = np.array(certain_merges_mask, dtype=np.bool)
+		p_merges_np = np.array(p_merges)
+		scipy.io.savemat(merges_dest,
+			{'certain_mask': certain_mask_np, 'merges': p_merges_np},
+			appendmat=False,
+			format='5',
+			oned_as='column')
 
 	return roots, closest
