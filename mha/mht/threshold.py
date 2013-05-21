@@ -3,6 +3,7 @@
 import consts
 import h5py
 import math
+import mht_c
 import numpy as np
 import scipy.io
 import scipy.ndimage as ndimage
@@ -78,6 +79,35 @@ def find_surfarea(areamap, pixels):
 	for ii in range(pixels.shape[1]):
 		surfarea += areamap[pixels[1,ii]]
 	return surfarea
+
+def mean_geo_speed(ssh, pixels, lat, lon):
+	"""
+	Returns the mean geostrophic speed for pixels. lat and lon should yield the correct values
+	for indices of ssh.
+	"""
+	g = 980.665
+	omega = 7.2921e-5
+	us = np.zeros(pixels.shape, dtype=np.float64)
+	vs = np.zeros(pixels.shape, dtype=np.float64)
+	x = (pixels - 1) % ssh.shape[1]
+	y = (pixels - 1) / ssh.shape[1]
+	lats = np.zeros(pixels.shape, dtype=np.float64)
+	for i in xrange(y.shape[0]):
+		lats[i] = lat[x[i]]
+	for i in xrange(pixels.shape[0]):
+		f = 2*omega*math.sin(lats[i]) # f is coriolis frequency
+		f = 2*omega*math.sin(0.25) if f == 0 else f
+		# Compute vs and us by taking the average with the difference of the next and
+		# previous pixel. Take into account wrap around for lons and caps for lats
+		dSSH_y = ssh[(y[i] + 1) % ssh.shape[0],x[i]]-ssh[(y[i]-1) % ssh.shape[0],x[i]]
+		dSSH_x = ssh[y[i],min(x[i]+1,ssh.shape[1]-1)]-ssh[y[i],max(0,x[i]-1)]
+		dy = mht_c.geodesic_dist(lon[(y[i] + 1) % ssh.shape[0]], lat[x[i]],
+			lon[(y[i] - 1) % ssh.shape[0]],lat[x[i]])*100000
+		dx = (min(x[i]+1,ssh.shape[1]-1)-max(0,x[i]-1))*111.12*100000*180/(lats.shape[0]-1)
+		vs[i] = -g*(dSSH_y)/(2*f*dy)
+		us[i] =  g*(dSSH_x)/(2*f*dx)
+	speeds = np.sqrt(us**2+vs**2)
+	return np.mean(speeds)
 
 def threshold(ssh, areamap, lons, lats, cyc, spixels, base_th, index):
 	"""
@@ -208,6 +238,7 @@ def threshold(ssh, areamap, lons, lats, cyc, spixels, base_th, index):
 	trans_coords(ssh_32.shape, top, left, centroids)
 	lonlat_centroids = trans_lonlat(lons.shape[1], lats.shape[1], centroids)
 	eddies = []
+	np.abs(amplitudes, amplitudes)
 	for ii in range(lonlat_centroids.shape[1]):
 		eddies.append(Eddy(lonlat_centroids[1,ii],
 			lonlat_centroids[0,ii],
