@@ -195,7 +195,8 @@ def build_mht(eddies_data,
 				eddies[i].SurfaceArea[0,0],
 				eddies[i].Stats[0,0].PixelIdxList[:,0],
 				eddies[i].ThreshFound[0,0],
-				eddies[i].Amplitude[0,0])
+				eddies[i].Amplitude[0,0],
+				eddies[i].MeanGeoSpeed[0,0])
 			if not within_bounds(eddy):
 				continue
 			eddy.id = '[' + dataset[0] + ' ' + str(i+1) + ']'

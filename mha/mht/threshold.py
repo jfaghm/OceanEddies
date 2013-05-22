@@ -194,7 +194,7 @@ def threshold(ssh, areamap, lons, lats, cyc, spixels, base_th, index):
 			max_eddies = blob_count
 			thresh_found = base_th-cyc*consts.THRESH_STEP*ii
 			pixels = np.zeros(blob_count, dtype=np.object)
-			amplitudes = np.zeros(blob_count, dtype=np.object)
+			amplitudes = np.zeros(blob_count, dtype=np.float64)
 			centroids = np.zeros((2, blob_count), dtype=np.float64)
 			if consts.DEBUG:
 				plt.subplot(blob_count*100+211)
@@ -229,10 +229,12 @@ def threshold(ssh, areamap, lons, lats, cyc, spixels, base_th, index):
 
 	raw_pixels = np.zeros(pixels.shape, dtype=np.object)
 	surfareas = np.zeros(pixels.shape, dtype=np.float64)
+	geo_speeds = np.zeros(pixels.shape, dtype=np.float64)
 	for i in range(pixels.shape[0]):
 		trans_coords(ssh_32.shape, top, left, pixels[i])
 		raw_pixels[i] = trans_linear(ssh_32.shape, pixels[i])
 		surfareas[i] = find_surfarea(areamap, pixels[i])
+		geo_speeds[i] = mean_geo_speed(ssh, raw_pixels[i], lats[0], lons[0])
 	trans_coords(ssh_32.shape, top, left, centroids)
 	lonlat_centroids = trans_lonlat(lons.shape[1], lats.shape[1], centroids)
 	eddies = []
@@ -243,5 +245,6 @@ def threshold(ssh, areamap, lons, lats, cyc, spixels, base_th, index):
 			surfareas[ii],
 			raw_pixels[ii],
 			thresh_found,
-			amplitudes[ii]))
+			amplitudes[ii],
+			geo_speeds[ii]))
 	return eddies
