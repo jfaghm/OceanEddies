@@ -8,6 +8,7 @@ classdef CheltonEddy
         Lon;
         Amplitude;
         ThreshFound;
+        MeanGeoSpeed; % cm/s
         SurfaceArea; %In sqkm.
         Cyc;
     end
@@ -18,7 +19,8 @@ classdef CheltonEddy
     
     
     methods
-        function obj = CheltonEddy(STATS, amplitude, lat, lon, thresh, sa, cyc)
+        function obj = CheltonEddy(STATS, amplitude, lat, lon, thresh, ...
+                sa, cyc, geospeed)
             if nargin
                 obj.Stats = STATS;
                 obj.Lat = lat;
@@ -28,6 +30,7 @@ classdef CheltonEddy
                 obj.SurfaceArea = sa;
                 obj.IsEmpty = false;
                 obj.Cyc = cyc;
+                obj.MeanGeoSpeed = geospeed;
             else
                 obj.Stats = regionprops([0 1; 0 0], 'BoundingBox', 'Centroid','ConvexArea', 'EquivDiameter', 'Area', 'PixelIdxList', 'PixelValues', 'FilledImage', 'MaxIntensity');
                 obj.Lat = Nan;
@@ -36,7 +39,8 @@ classdef CheltonEddy
                 obj.ThreshFound = NaN;
                 obj.SurfaceArea = NaN;
                 obj.Cyc = 0;
-                obj.IsEmpty = true;                
+                obj.IsEmpty = true;
+                obj.MeanGeoSpeed = NaN;
             end
         end
     end

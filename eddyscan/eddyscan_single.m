@@ -17,9 +17,10 @@ ssh_extended(:,(201+size(ssh_data,2)):end) = ssh_data(:,1:200);
 areamap = load('../data/quadrangle_area_by_lat.mat');
 areamap = areamap.areamap;
 
-mask = ones(size(ssh_extended));
+mask = zeros(size(ssh_extended));
 landval = max(max(ssh_data));
-mask(landval == ssh_extended) = 0;
+mask(landval == ssh_extended) = 1;
+mask = ~bwmorph(mask, 'dilate', 9);
 ssh_extended_data = ssh_extended;
 ssh_extended = mat2gray(ssh_extended,[-100 100]);
 
@@ -115,9 +116,11 @@ for thresh=thresh_range
                         
                         if STATS.Centroid(1) <= 1640 && STATS.Centroid(1) > 200
                             %display(['    ' num2str(idx) ' eddies found.']);
+                            geospeed = mean_geo_speed(ssh_data, ...
+                                STATS.PixelIdxList, lats, lons);
                             eddies(idx) = CheltonEddy(STATS,...
                                 amplitude, centroid_lat, centroid_lon,...
-                                realthresh, surface_area, cyc);
+                                realthresh, surface_area, cyc, geospeed);
                             idx = idx + 1;
                         else
                             %display('duplicate eddy found');
