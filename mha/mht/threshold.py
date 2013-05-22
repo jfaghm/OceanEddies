@@ -91,12 +91,10 @@ def mean_geo_speed(ssh, pixels, lat, lon):
 	vs = np.zeros(pixels.shape, dtype=np.float64)
 	x = (pixels - 1) % ssh.shape[1]
 	y = (pixels - 1) / ssh.shape[1]
-	lats = np.zeros(pixels.shape, dtype=np.float64)
-	for i in xrange(y.shape[0]):
-		lats[i] = lat[x[i]]
+	lats = lat[x]
+	f = 2*omega*np.sin(lats) # f is coriolis frequency
+	f[f == 0] = 2*omega*math.sin(0.25)
 	for i in xrange(pixels.shape[0]):
-		f = 2*omega*math.sin(lats[i]) # f is coriolis frequency
-		f = 2*omega*math.sin(0.25) if f == 0 else f
 		# Compute vs and us by taking the average with the difference of the next and
 		# previous pixel. Take into account wrap around for lons and caps for lats
 		dSSH_y = ssh[(y[i] + 1) % ssh.shape[0],x[i]]-ssh[(y[i]-1) % ssh.shape[0],x[i]]
@@ -104,8 +102,8 @@ def mean_geo_speed(ssh, pixels, lat, lon):
 		dy = mht_c.geodesic_dist(lon[(y[i] + 1) % ssh.shape[0]], lat[x[i]],
 			lon[(y[i] - 1) % ssh.shape[0]],lat[x[i]])*100000
 		dx = (min(x[i]+1,ssh.shape[1]-1)-max(0,x[i]-1))*111.12*100000*180/(lats.shape[0]-1)
-		vs[i] = -g*(dSSH_y)/(2*f*dy)
-		us[i] =  g*(dSSH_x)/(2*f*dx)
+		vs[i] = -g*(dSSH_y)/(2*f[i]*dy)
+		us[i] =  g*(dSSH_x)/(2*f[i]*dx)
 	speeds = np.sqrt(us**2+vs**2)
 	return np.mean(speeds)
 
