@@ -28,7 +28,7 @@ A tracking algorithm that maintains multiple hypothesis and does n-scan pruning.
  + H5py
 
 ### Build
-To build MHA, run ```python setup.py build_ext -b mht```
+To build MHA, run ``python setup.py build_ext -b mht``
 
 ### Example Usage
 ```python
@@ -41,3 +41,6 @@ roots, closest = mht.build_mht(mht.list_eddies(eddies_path, 'eddies'), mht.CYCLO
 	quad_data_path, prune_depth=2, do_lookahead=True, do_correction=False)
 mht.write_tracks(roots, 'cyclonic_tracks.mat', list_dates(eddies_path, 'eddies'), prune_depth, closest)
 ```
+
+### Exporting
+To convert data from the representation used by MHA to a two dimensional table format, use ``mha_export``. Note that this requires MATLAB to run.
