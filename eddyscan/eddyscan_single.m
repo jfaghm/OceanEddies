@@ -43,11 +43,11 @@ R = georasterref('LatLim', [-90 90], 'LonLim', [0 360], 'RasterSize', size(ssh_d
 if cyc==1
     thresh_range = 0:.005:1;
     intensity = 'MaxIntensity';
-    cycid = 'Anticyclonic';
+%     cycid = 'Anticyclonic';
 elseif cyc==-1
     thresh_range = 1:-.005:0;
     intensity = 'MinIntensity';
-    cycid = 'Cyclonic';
+%     cycid = 'Cyclonic';
 end
 
 idx = 1;
@@ -73,7 +73,7 @@ for thresh=thresh_range
         STATS = regionprops(blobbw, ssh_extended_data, 'Area', 'Extrema',...
             'PixelIdxList', intensity, 'ConvexImage', 'BoundingBox', 'Centroid');
         extPixelIdxList = STATS.PixelIdxList;
-        [STATS.PixelIdxList r c] = extidx2original(STATS.PixelIdxList);
+        [STATS.PixelIdxList, r, c] = extidx2original(STATS.PixelIdxList);
         if ( (8<STATS.Area) && (STATS.Area<1000) )
             blobpmtr = bwperim(blobbw);
             meanpmtr = mean(ssh_extended_data(blobpmtr == 1));
@@ -85,7 +85,7 @@ for thresh=thresh_range
             end
             
             if ( (amplitude>=1)  && (has_local_maxmin(STATS.PixelIdxList)) )
-                [centroid_lat centroid_lon] = get_centroid(r,c);
+                [centroid_lat, centroid_lon] = get_centroid(r,c);
                 surface_area = get_image_area(r);
                 convex_pass = false; %#ok<NASGU>
                 bb = STATS.BoundingBox;
@@ -95,45 +95,44 @@ for thresh=thresh_range
                 j_start = ceil(bb(1));
                 j_end = j_start+bb(3)-1;
                 convex_image(i_start:i_end,j_start:j_end) = STATS.ConvexImage(:,:);
-                [dummy convr ~] = extidx2original(find(convex_image)); %#ok<ASGLU>
+                [dummy, convr, ~] = extidx2original(find(convex_image)); %#ok<ASGLU>
                 convex_area = get_image_area(convr);
                 
                 
                 maxdist = get_max_dist(STATS.Extrema);
                 maxdist_lim = get_maxdist_limit(centroid_lat);
                 
-                if maxdist<maxdist_lim
-                
-                    if test_convexity(centroid_lat, convex_area)
-                        test = test+1;
-                        convex_pass = surface_area/convex_area>convexity_ratio_limit;
-                    else
-                        no_test = no_test+1;
-                        convex_pass = true;
-                    end
-                    
-                    if convex_pass
-                        
-                        if STATS.Centroid(1) <= 1640 && STATS.Centroid(1) > 200
-                            %display(['    ' num2str(idx) ' eddies found.']);
-                            geospeed = mean_geo_speed(ssh_data, ...
-                                STATS.PixelIdxList, lats, lons);
-                            eddies(idx) = CheltonEddy(STATS,...
-                                amplitude, centroid_lat, centroid_lon,...
-                                realthresh, surface_area, cyc, geospeed);
-                            idx = idx + 1;
-                        else
-                            %display('duplicate eddy found');
-                        end
-                        mask(extPixelIdxList) = 0;
-                    end
-                
+                if maxdist >= maxdist_lim
+                    continue;
                 end
                 
+                if test_convexity(centroid_lat, convex_area)
+                    test = test+1;
+                    convex_pass = surface_area/convex_area>convexity_ratio_limit;
+                else
+                    no_test = no_test+1;
+                    convex_pass = true;
+                end
+                
+                if ~convex_pass
+                    continue;
+                end
+                
+                if STATS.Centroid(1) <= 1640 && STATS.Centroid(1) > 200
+                    %display(['    ' num2str(idx) ' eddies found.']);
+                    geospeed = mean_geo_speed(ssh_data, ...
+                        STATS.PixelIdxList, lats, lons);
+                    eddies(idx) = CheltonEddy(STATS,...
+                        amplitude, centroid_lat, centroid_lon,...
+                        realthresh, surface_area, cyc, geospeed);
+                    idx = idx + 1;
+                else
+                    %display('duplicate eddy found');
+                end
+                mask(extPixelIdxList) = 0;
+                
             end
-            
         end
-        
     end
     
     %display(['Test/no_test ratio currently ' num2str(test/no_test) '.']);
@@ -200,7 +199,7 @@ end
         area = sum(areamap(rows));
     end
 
-    function [lat lon] = get_centroid(i,j)
+    function [lat, lon] = get_centroid(i,j)
         % Returns lat and lon of eddy centroid.
         %[i j] = ind2sub(size(ssh_data), pxidxs);
         [lat, lon] = pix2latlon(R,i,j);
@@ -216,7 +215,7 @@ end
                 % Iterate through pixels, if max is found return true.
                 delta_i = -1;
                 delta_j = -1;
-                [i j] = ind2sub(size(ssh_data), pxidxs(pixcount));
+                [i, j] = ind2sub(size(ssh_data), pxidxs(pixcount));
                 bool = true;
                 while bool && (delta_i<=1)
                     while bool && (delta_j<=1)
@@ -244,7 +243,7 @@ end
                 % Iterate through pixels, if max is found return true.
                 delta_i = -1;
                 delta_j = -1;
-                [i j] = ind2sub(size(ssh_data), pxidxs(pixcount));
+                [i, j] = ind2sub(size(ssh_data), pxidxs(pixcount));
                 bool = true;
                 while bool && (delta_i<=1)
                     while bool && (delta_j<=1)
@@ -269,7 +268,7 @@ end
     end
 
     function [idx, row, col] = extidx2original(idx)
-        [row col] = ind2sub(size(ssh_extended),idx);
+        [row, col] = ind2sub(size(ssh_extended),idx);
         offright = col > 1640;
         offleft = col < 201;
         notoff = ~(offleft | offright);
