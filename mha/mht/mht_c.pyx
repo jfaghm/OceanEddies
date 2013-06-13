@@ -1,7 +1,7 @@
 import consts
 from eddy import Eddy
 from node import Node
-from libc.math cimport sin, cos, acos, fabs
+from libc.math cimport sin, cos, acos, asin, sqrt, fabs
 
 cdef double pi = 3.14159265
 
@@ -17,6 +17,21 @@ cdef double get_min(double a, double b):
 	if a < b:
 		return a
 	return b
+
+# Uses http://en.wikipedia.org/wiki/Haversine_formula
+cdef double get_dist(double lon1, double lat1, double lon2, double lat2):
+	cdef double tmp, rad_dist, dlon
+	if (lat1 == lat2) and (lon1 == lon2):
+		return 0
+	lat1 = radians(lat1)
+	lat2 = radians(lat2)
+	dlon = radians(fabs(lon2-lon1))
+	tmp = sqrt(sin((lat2-lat1)/2)**2 + cos(lat1)*cos(lat2)*sin(dlon/2)**2)
+	rad_dist = 2*asin(get_max(get_min(tmp, 1.0), -1.0)) # Force the number to be within the domain
+	return rad_dist * 6371.01 # km
+
+def geodesic_dist(lon1, lat1, lon2, lat2):
+	return get_dist(lon1, lat1, lon2, lat2)
 
 cdef bint gate(old_node, new_node, double gate_dist):
 	cdef double old_lon, new_lon, old_lat_rad, new_lat_rad, tmp, rad_dist, dist, adj_gate_dist

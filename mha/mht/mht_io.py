@@ -14,17 +14,17 @@ def load_tracks(src, timesteps):
 		track = tracks[j,0]
 		parent = None
 		for i in range(track.shape[0]):
-			pixels = track[i,9:]
+			pixels = track[i,10:]
 			pixels = pixels[pixels > -1]
-			eddy = Eddy(track[i,0], track[i,1], track[i,5], pixels, track[i,7],
-				track[i,6])
+			eddy = Eddy(track[i,0], track[i,1], track[i,5], pixels, track[i,8],
+				track[i,6], track[i,9])
 			eddy.id = '[' + timesteps[int(track[i,2])-1] + ' ' + str(i+1) + ']'
 			node = Node(eddy)
 			node.final = True
 			node.base_depth = int(track[i,2]-1)
 			node.score = track[i,3]
 			node.closest = track[i,4]
-			node.missing = bool(track[i,8])
+			node.missing = bool(track[i,7])
 			if parent is None:
 				roots[j] = node
 			else:
@@ -56,7 +56,7 @@ def write_tracks(roots, dest, timesteps, prune_depth, closest, gate_dist = 150):
 	eddies_tracks = np.zeros(len(all_tracks), dtype=np.object)
 	for i in range(len(all_tracks)):
 		eddy_track = []
-		max_len = 0
+		max_len = 1
 		for j in range(len(all_tracks[i])):
 			if type(all_tracks[i][j].obj) is Eddy:
 				eddy_track.append(np.array([all_tracks[i][j].obj.lat,
@@ -67,10 +67,11 @@ def write_tracks(roots, dest, timesteps, prune_depth, closest, gate_dist = 150):
 						all_tracks[i][j].obj.surf_area,
 						all_tracks[i][j].obj.amp,
 						int(all_tracks[i][j].missing),
-						all_tracks[i][j].obj.thresh] + all_tracks[i][j].obj.pixelidxlist.tolist(),
+						all_tracks[i][j].obj.thresh,
+						all_tracks[i][j].obj.geo_speed] + all_tracks[i][j].obj.pixelidxlist.tolist(),
 					dtype=np.float64))
-				max_len = max(max_len, len(all_tracks[i][j].obj.pixelidxlist) + 8)
-		eddies_track_np = np.empty((len(eddy_track),max_len+1), dtype=np.float64)
+				max_len = max(max_len, len(all_tracks[i][j].obj.pixelidxlist) + 10)
+		eddies_track_np = np.empty((len(eddy_track),max_len), dtype=np.float64)
 		eddies_track_np[:] = -1
 		for j in range(len(eddy_track)):
 			eddies_track_np[j,:len(eddy_track[j])] = eddy_track[j]
