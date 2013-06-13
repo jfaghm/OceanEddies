@@ -40,8 +40,7 @@ def load_tracks(src, timesteps):
 		'prune_depth':prune_depth,
 		'gate_dist':gate_dist}
 
-def write_tracks(roots, dest, timesteps, prune_depth, closest, gate_dist = 150):
-	"""Write the confirmed portion of the tracks in roots to dest where timesteps is a tuple/list"""
+def export_tracks(roots, timesteps, prune_depth):
 	all_tracks = deque()
 	for root in roots:
 		for track in root.tracks():
@@ -76,6 +75,11 @@ def write_tracks(roots, dest, timesteps, prune_depth, closest, gate_dist = 150):
 		for j in range(len(eddy_track)):
 			eddies_track_np[j,:len(eddy_track[j])] = eddy_track[j]
 		eddies_tracks[i] = eddies_track_np
+	return eddies_tracks
+
+def write_tracks(roots, dest, timesteps, prune_depth, closest, gate_dist = 150):
+	"""Write the confirmed portion of the tracks in roots to dest where timesteps is a tuple/list"""
+	eddies_tracks = export_tracks(roots, timesteps, prune_depth)
 	scipy.io.savemat(dest,
 		{'tracks': eddies_tracks,
 		 'start_date': np.array(int(timesteps[0]), dtype=np.int),
