@@ -1,4 +1,4 @@
-function [ seddies ] = eddyscan_single(ssh_data, lats, lons, cyc)
+function [ eddies ] = eddyscan_single(ssh_data, lats, lons, cyc)
 %FIND_EDDIES_MAIN_INTEGRATED Finds eddies using Chelton thresholding and
 %maxima and convex criteria.
 %   Will return an array of struct's that contain the eddy data.
@@ -51,7 +51,7 @@ elseif cyc==-1
 end
 
 idx = 1;
-eddies = CheltonEddy.empty(800,0);
+eddies = new_eddy();
 %display(['============== Finding ' cycid ' Eddies for Date: ' num2str(date) ' ==============']);
 
 %% Main Algorithm
@@ -122,7 +122,7 @@ for thresh=thresh_range
                     %display(['    ' num2str(idx) ' eddies found.']);
                     geospeed = mean_geo_speed(ssh_data, ...
                         STATS.PixelIdxList, lats, lons);
-                    eddies(idx) = CheltonEddy(STATS,...
+                    eddies(idx) = new_eddy(STATS,...
                         amplitude, centroid_lat, centroid_lon,...
                         realthresh, surface_area, cyc, geospeed);
                     idx = idx + 1;
@@ -139,18 +139,6 @@ for thresh=thresh_range
     
 end
 
-% Convert eddies from class-array to struct-array
-if ~isempty(eddies)
-    warning('off', 'MATLAB:structOnObject');
-    seddies = struct(eddies(1));
-    for ii = 1:length(eddies)
-        seddies(ii) = struct(eddies(ii));
-    end
-    warning('on', 'MATLAB:structOnObject');
-else
-    seddies = struct();
-end
-    
 %% Helper Functions
     function [bool] = test_convexity(lat, surface_area)
         bool = surface_area>areas(round(abs(lat))+1);
@@ -276,6 +264,30 @@ end
         col(offleft)=col(offleft)+1240;
         col(notoff)=col(notoff)-200;
         idx = sub2ind(size(ssh_data),row,col);
+    end
+
+    function eddy = new_eddy(STATS, amplitude, lat, lon, thresh, sa, cyc, geospeed)
+        if nargin
+            eddy = struct('Stats', STATS, ...
+                'Lat', lat, ...
+                'Lon', lon, ...
+                'Amplitude', amplitude, ...
+                'ThreshFound', thresh, ...
+                'SurfaceArea', sa, ...
+                'IsEmpty', false, ...
+                'Cyc', cyc, ...
+                'MeanGeoSpeed', geospeed);
+        else
+            eddy = struct('Stats', {}, ...
+                'Lat', {}, ...
+                'Lon', {}, ...
+                'Amplitude', {}, ...
+                'ThreshFound', {}, ...
+                'SurfaceArea', {}, ...
+                'IsEmpty', {}, ...
+                'Cyc', {}, ...
+                'MeanGeoSpeed', {});
+        end
     end
 end
     
