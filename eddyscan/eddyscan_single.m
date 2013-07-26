@@ -17,10 +17,13 @@ ssh_extended(:,(201+size(ssh_data,2)):end) = ssh_data(:,1:200);
 areamap = load('../data/quadrangle_area_by_lat.mat');
 areamap = areamap.areamap;
 
-mask = zeros(size(ssh_extended));
-landval = max(max(ssh_data));
-mask(landval == ssh_extended) = 1;
-mask = ~bwmorph(mask, 'dilate', 9);
+sshnan = sum(isnan(ssh_data(:))) > 0;
+if sshnan
+    mask = ~isnan(ssh_extended);
+else
+    landval = max(ssh_data(:));
+    mask = ~(ssh_extended == landval);
+end
 ssh_extended_data = ssh_extended;
 ssh_extended = mat2gray(ssh_extended,[-100 100]);
 
