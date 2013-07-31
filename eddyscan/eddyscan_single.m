@@ -1,5 +1,5 @@
 function [ eddies ] = eddyscan_single(ssh_data, lats, lons, cyc)
-%FIND_EDDIES_MAIN_INTEGRATED Finds eddies using Chelton thresholding and
+%EDDYSCAN_SINGLE Finds eddies using Chelton thresholding and
 %maxima and convex criteria.
 %   Will return an array of struct's that contain the eddy data.
 %   ssh_data: A 2D array of double's that contain the sea surface heights (latsxlons)
