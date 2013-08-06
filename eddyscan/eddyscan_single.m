@@ -60,7 +60,7 @@ eddies = new_eddy();
 %% Main Algorithm
 for thresh=thresh_range
     realthresh = thresh*200-100;
-    display(['Threshold value is currently ' num2str(realthresh)]);
+%     display(['Threshold value is currently ' num2str(realthresh)]);
     bw = im2bw(ssh_extended, thresh);
     if cyc==-1
         bw = imcomplement(bw);
@@ -196,7 +196,8 @@ end
         % Returns lat and lon of eddy centroid.
         %[i j] = ind2sub(size(ssh_data), pxidxs);
         [lat, lon] = pix2latlon(R,i,j);
-        [lat, lon] = meanm(lat, lon);            
+        [lat, lon] = meanm(lat, lon);
+        lon = (lon > 180).*(lon - 360) + (lon <= 180).*lon;
     end
     
     function [bool] = has_local_maxmin( pxidxs )
