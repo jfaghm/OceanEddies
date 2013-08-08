@@ -14,15 +14,7 @@ function [ eddies ] = bottom_up_single(ssh_data, lat, lon, cyc)
     areamap = load('../data/quadrangle_area_by_lat.mat');
     areamap = areamap.areamap;
     
-    padded = [ssh_data(:,end-1:end) ssh_data(:,:) ssh_data(:,1:2)];
-    padded(isnan(padded)) = cyc*-Inf;
-    padded = padarray(padded, [1, 1], cyc*-Inf);
-    n = ones(5); n(3, 3) = 0;
-    padded = cyc .* padded; % Want to find right extrema for cyclonic and anticyc eddies
-
-    extrema = padded > imdilate(padded, n);
-    extrema = extrema(2:end-1, 4:end-3);
-
+    extrema = get_extrema(ssh_data, cyc);
     origExtrema = extrema;
     extrema = [zeros(size(extrema, 1), 200), extrema, zeros(size(extrema, 1), 200)];
 
@@ -130,7 +122,7 @@ function [pixelX, pixelY, eddy] = thresholdBU(cyc, left, right, top, bottom, ...
             % weighted_centroid returns lon from 0-360, fix this
             elon = (elon > 180).*(elon - 360) + (elon <= 180).*elon;
             sarea = get_image_area(stats.PixelList(:,1));
-            eddy = new_eddy(stats, amp, elat, elon, thresh, sarea, cyc, geoSpeed);
+            eddy = new_eddy(stats, amp, elat, elon, thresh, sarea, cyc, geoSpeed, 'ESv2');
 
             [pixelX, pixelY] = ind2sub(size(ssh), find(previous == 1));
             return

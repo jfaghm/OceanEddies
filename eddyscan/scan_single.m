@@ -5,9 +5,8 @@ function [ eddies ] = scan_single( ssh, lat, lon, cyc, scan_type )
 % scan_type: 'v1', 'v2', 'hybrid'
 %         v1: Will run top-down scanning
 %         v2: Will run bottom-up scanning from the minima of the field
-%     hybrid: Will run v2 scanning then run v1 scanning with all of the
-%             bodies found by v2 removed (ie. set above the max threshold)
-%             and return the combined set of features.
+%     hybrid: Will run v2 and v1 scanning and will take the union of the
+%             two sets where, for common features, v2 bodies will be used
     if ~any(isnan(ssh(:)))
         error('Invalid ssh data, must contain NaNs for land values');
     end
@@ -23,7 +22,12 @@ function [ eddies ] = scan_single( ssh, lat, lon, cyc, scan_type )
         case 2
             eddies = bottom_up_single(ssh, lat, lon, ctype);
         case 0
-            error('Not yet implemented');
+            scanners = {@eddyscan_single, @bottom_up_single};
+            eddies_out = {[], []};
+            parfor i = 1:2
+                eddies_out{i} = scanners{i}(ssh, lat, lon, ctype);
+            end
+            eddies = get_combined_eddy_frames(eddies_out{2}, eddies_out{1}, ssh);
     end
     
     path(oldpath);

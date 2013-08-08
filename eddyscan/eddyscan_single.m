@@ -60,7 +60,7 @@ function [ eddies ] = eddyscan_single(ssh_data, lats, lons, cyc)
     %% Main Algorithm
     for thresh=thresh_range
         realthresh = thresh*200-100;
-    %     display(['Threshold value is currently ' num2str(realthresh)]);
+        display(['Threshold value is currently ' num2str(realthresh)]);
         bw = im2bw(ssh_extended, thresh);
         if cyc==-1
             bw = imcomplement(bw);
@@ -129,7 +129,7 @@ function [ eddies ] = eddyscan_single(ssh_data, lats, lons, cyc)
                             STATS.PixelIdxList, lats, lons);
                         eddies(idx) = new_eddy(STATS,...
                             amplitude, centroid_lat, centroid_lon,...
-                            realthresh, surface_area, cyc, geospeed);
+                            realthresh, surface_area, cyc, geospeed, 'ESv1');
                         idx = idx + 1;
                     else
                         %display('duplicate eddy found');
