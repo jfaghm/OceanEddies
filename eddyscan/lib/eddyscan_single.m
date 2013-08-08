@@ -60,7 +60,7 @@ function [ eddies ] = eddyscan_single(ssh_data, lats, lons, cyc)
     %% Main Algorithm
     for thresh=thresh_range
         realthresh = thresh*200-100;
-        display(['Threshold value is currently ' num2str(realthresh)]);
+%         display(['Threshold value is currently ' num2str(realthresh)]);
         bw = im2bw(ssh_extended, thresh);
         if cyc==-1
             bw = imcomplement(bw);
