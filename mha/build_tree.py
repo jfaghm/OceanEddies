@@ -2,10 +2,7 @@
 
 import mht
 
-prune_depth = 2
 eddies_path = '/path/to/eddyscan/out'
 
-roots = mht.build_mht(mht.list_eddies(eddies_path, 'eddies'), prune_depth=prune_depth,
-	do_lookahead=True, gate_dist=150, prune_mode='parent')
-mht.write_tracks(roots, 'cyclonic_tracks.mat', mht.list_dates(eddies_path, 'eddies'),
-	prune_depth, gate_dist=150)
+roots = mht.build_mht(mht.list_eddies(eddies_path, 'eddies'), do_lookahead=True)
+mht.write_tracks(roots, 'cyclonic_tracks.mat', mht.list_dates(eddies_path, 'eddies'))
