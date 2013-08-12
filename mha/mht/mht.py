@@ -128,7 +128,6 @@ def mk_node_and_add(eddy, depth, pnodes, roots, gate_dist):
 	gate_and_add(pnodes, enode, gate_dist)
 	enode.base_depth = depth
 	enode.dist = 0 # This was set during gate_and_add()'s calls to gate()
-#	enode.add_child(Node(consts.FPOSITIVE))
 	roots.append(enode)
 
 def build_mht(eddies_data,

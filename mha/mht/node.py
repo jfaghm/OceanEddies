@@ -42,7 +42,7 @@ class Node(object):
 		return finals
 
 def is_term(node):
-	if node.obj == consts.END or node.obj == consts.FPOSITIVE:
+	if node.obj == consts.END:
 		return True
 	else:
 		return False
