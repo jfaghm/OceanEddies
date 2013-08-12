@@ -13,10 +13,12 @@ SSH data.
 ```matlab
 % Find all anticyclonic eddies
 ssh_slice = ncread('ssh_data.nc', 'Grid_0001');
+landval = max(ssh_slice(:));
+ssh_slice(ssh_slice == landval) = NaN;
 lat = ncread('ssh_data.nc', 'NbLatitudes');
 lon = ncread('ssh_data.nc', 'NbLongitudes');
 lon(lon >= 180) = lon(lon >= 180)-360;
-eddies = eddyscan_single(ssh_slice, lat, lon, 1);
+eddies = scan_single(ssh_slice, lat, lon, 'anticyc', 'v2');
 ```
 
 ## MHA
