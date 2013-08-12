@@ -130,7 +130,6 @@ def mk_node_and_add(eddy, depth, pnodes, roots, gate_dist):
 	roots.append(enode)
 
 def build_mht(eddies_data,
-	cyc,
 	prune_depth = 2,
 	within_bounds = lambda x: True,
 	do_lookahead = True,
@@ -141,7 +140,6 @@ def build_mht(eddies_data,
 	Build the multi-hypothesis tree. Returns roots as an iterator.
 
 	eddies_data: iterator of tuples which are (date, path)
-	cyc: Use CYCLONIC or ANTICYC
 	prune_depth: depth at which to begin pruning (index of 0)
 	within_bounds: function to check whether an eddy should be included in the results
 	do_lookahead: Boolean value whether or not to allow eddies to disappear for one timestep
