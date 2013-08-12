@@ -7,7 +7,6 @@ import mht_io as io
 import numpy as np
 import scipy.io
 import time
-import threshold
 from collections import deque
 from eddy import *
 from mht_c import *
@@ -137,7 +136,6 @@ def build_mht(eddies_data,
 	prune_depth = 2,
 	within_bounds = lambda x: True,
 	do_lookahead = True,
-	do_correction = False,
 	gate_dist = 150,
 	prev_data = None,
 	prune_mode = 'parent'):
@@ -151,7 +149,6 @@ def build_mht(eddies_data,
 	prune_depth: depth at which to begin pruning (index of 0)
 	within_bounds: function to check whether an eddy should be included in the results
 	do_lookahead: Boolean value whether or not to allow eddies to disappear for one timestep
-	do_correction: Boolean value whether or not to correct eddies found (via re-thresholding)
 	prev_data: Load previously computed data. Expects a dict with keys roots, closest,
 	           start_depth (depth at which this instance should start), prune_depth, gate_dist.
 	prune_mode: What method should be used for pruning. Use 'child' for pruning by finding the
@@ -201,35 +198,6 @@ def build_mht(eddies_data,
 			eddy.id = '[' + dataset[0] + ' ' + str(i+1) + ']'
 			c_eddies += [eddy]
 			mk_node_and_add(eddy, depth, pnodes, roots, gate_dist)
-
-		if do_correction and depth > 0:
-			parentless = (node for node in roots if node.base_depth == depth)
-			e_instances, child_score = get_eddy_instances(pnodes, parentless, gate_dist)
-			merged = []
-			for eddy, instances in e_instances.iteritems():
-				too_big = True
-				for instance in instances:
-					if child_score[instance][1] is not None and \
-						consts.SURF_AREA_INC_COEFF * child_score[instance][1].obj.surf_area > eddy.surf_area:
-						too_big = False
-				if too_big and len(instances) > 1:
-					new_eddies = threshold.threshold(ssh[depth,:,:],
-						areamap,
-						lons,
-						lats,
-						cyc,
-						eddy.pixelidxlist,
-						eddy.thresh,
-						eddy.id)
-					if len(new_eddies) > 1:
-						merged += new_eddies
-						for instance in instances:
-							if child_score[instance][1] is None:
-								roots.remove(instance)
-							else:
-								child_score[instance][1].remove_child(instance)
-			for neweddy in merged:
-				mk_node_and_add(neweddy, depth, pnodes, roots, gate_dist)
 
 		if do_lookahead:
 			lookahead.add_lookahead_nodes(pnodes, c_eddies, closest, gate_dist)
