@@ -169,15 +169,15 @@ def build_mht(eddies_data,
 		pnodes = get_nodes_at_depth(roots, depth - 1)
 		for i in range(len(eddies)):
 			eddy = Eddy(eddies[i].Stats[0,0],
-                eddies[i].Lat[0,0],
+				eddies[i].Lat[0,0],
 				eddies[i].Lon[0,0],
 				eddies[i].Amplitude[0,0],
 				eddies[i].ThreshFound[0,0],
 				eddies[i].SurfaceArea[0,0],
 				eddies[i].Date[0,0],
-                eddies[i].Cyc[0,0],
+				eddies[i].Cyc[0,0],
 				eddies[i].MeanGeoSpeed[0,0],
-                eddies[i].DetectedBy[0])
+				eddies[i].DetectedBy[0])
 			if not within_bounds(eddy):
 				continue
 			mk_node_and_add(eddy, depth, pnodes, roots, gate_dist)

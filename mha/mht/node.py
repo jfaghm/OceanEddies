@@ -23,8 +23,7 @@ class Node(object):
 		self.children += children
 
 	def set_child(self, child):
-		"""Sets the final child value for the node essentially turning
-                   the tree into a chain"""
+		"""Sets the final child value effectively turning the tree into a chain"""
 		self.children = [child]
 		self.final = True
 
