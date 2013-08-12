@@ -47,42 +47,6 @@ def export_tracks(roots, timesteps, prune_depth):
 			all_tracks.append(tuple(sure_track))
 
 	all_tracks = tuple(set(all_tracks))
-
-	eddies_tracks = np.zeros(len(all_tracks), dtype=np.object)
-	for i in range(len(all_tracks)):
-		eddy_track = []
-		max_len = 1
-		for j in range(len(all_tracks[i])):
-			if type(all_tracks[i][j].obj) is Eddy:
-				eddy_track.append(np.array([all_tracks[i][j].obj.Lat,
-						all_tracks[i][j].obj.Lon,
-						all_tracks[i][0].base_depth+1+j,
-						all_tracks[i][j].score,
-						all_tracks[i][j].obj.SurfaceArea,
-						all_tracks[i][j].obj.Amplitude,
-						int(all_tracks[i][j].missing),
-						all_tracks[i][j].obj.ThreshFound,
-						all_tracks[i][j].obj.MeanGeoSpeed] + all_tracks[i][j].obj.Stats.PixelIdxList.tolist(),
-					dtype=np.float64))
-				max_len = max(max_len, len(all_tracks[i][j].obj.PixelIdxList) + 10)
-		eddies_track_np = np.empty((len(eddy_track),max_len), dtype=np.float64)
-		eddies_track_np[:] = -1
-		for j in range(len(eddy_track)):
-			eddies_track_np[j,:len(eddy_track[j])] = eddy_track[j]
-		eddies_tracks[i] = eddies_track_np
-	return eddies_tracks
-
-def export_tracks_new(roots, timesteps, prune_depth):
-	all_tracks = deque()
-	for root in roots:
-		for track in root.tracks():
-			end = len(timesteps)-prune_depth-track[0].base_depth
-			if end <= 0:
-				continue
-			sure_track = track[:end]
-			all_tracks.append(tuple(sure_track))
-
-	all_tracks = tuple(set(all_tracks))
 	
 	eddies_tracks = np.zeros(len(all_tracks), dtype=[('StartDate', 'i4'),
 		('StartIndex', 'i4'), ('Length', 'u2'), ('Frames', 'object')])
@@ -115,7 +79,7 @@ def export_tracks_new(roots, timesteps, prune_depth):
 
 def write_tracks(roots, dest, timesteps, prune_depth, gate_dist = 150):
 	"""Write the confirmed portion of the tracks in roots to dest where timesteps is a tuple/list"""
-	eddies_tracks = export_tracks_new(roots, timesteps, prune_depth)
+	eddies_tracks = export_tracks(roots, timesteps, prune_depth)
 	scipy.io.savemat(dest,
 		{'tracks': eddies_tracks,
 		 'start_date': np.array(int(timesteps[0]), dtype=np.int),
