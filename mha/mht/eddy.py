@@ -14,7 +14,7 @@ class Eddy(object):
 		self.Date = date
 		self.Cyc = cyc
 		self.MeanGeoSpeed = geo_speed
-		self.DetectedBy = detectedBy
+		self.DetectedBy = detectedby
 
 class Stats(object):
 	__slots__ = ('Area', 'Extrema', 'PixelIdxList', 'Intensity', 'ConvexImage', 'BoundingBox',
@@ -39,7 +39,7 @@ class Stats(object):
 		self.MinorAxisLength = minorAxisLength
 
 	@staticmethod
-	def new_from_mat(stats)
+	def new_from_mat(stats):
 		return Stats(stats.Area[0,0], stats.Extrema, stats.PixelIdxList[:,0],
 			stats.Intensity[0,0], stats.ConvexImage, stats.BoundingBox[0,:],
 			stats.Centroid[0,:], stats.PixelList, stats.Solidity[0,0],
