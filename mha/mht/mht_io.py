@@ -18,7 +18,6 @@ def load_tracks(src, timesteps):
 			pixels = pixels[pixels > -1]
 			eddy = Eddy(track[i,0], track[i,1], track[i,5], pixels, track[i,8],
 				track[i,6], track[i,9])
-			eddy.id = '[' + timesteps[int(track[i,2])-1] + ' ' + str(i+1) + ']'
 			node = Node(eddy)
 			node.final = True
 			node.base_depth = int(track[i,2]-1)
@@ -55,17 +54,17 @@ def export_tracks(roots, timesteps, prune_depth):
 		max_len = 1
 		for j in range(len(all_tracks[i])):
 			if type(all_tracks[i][j].obj) is Eddy:
-				eddy_track.append(np.array([all_tracks[i][j].obj.lat,
-						all_tracks[i][j].obj.lon,
+				eddy_track.append(np.array([all_tracks[i][j].obj.Lat,
+						all_tracks[i][j].obj.Lon,
 						all_tracks[i][0].base_depth+1+j,
 						all_tracks[i][j].score,
-						all_tracks[i][j].obj.surf_area,
-						all_tracks[i][j].obj.amp,
+						all_tracks[i][j].obj.SurfaceArea,
+						all_tracks[i][j].obj.Amplitude,
 						int(all_tracks[i][j].missing),
-						all_tracks[i][j].obj.thresh,
-						all_tracks[i][j].obj.geo_speed] + all_tracks[i][j].obj.pixelidxlist.tolist(),
+						all_tracks[i][j].obj.ThreshFound,
+						all_tracks[i][j].obj.MeanGeoSpeed] + all_tracks[i][j].obj.Stats.PixelIdxList.tolist(),
 					dtype=np.float64))
-				max_len = max(max_len, len(all_tracks[i][j].obj.pixelidxlist) + 10)
+				max_len = max(max_len, len(all_tracks[i][j].obj.PixelIdxList) + 10)
 		eddies_track_np = np.empty((len(eddy_track),max_len), dtype=np.float64)
 		eddies_track_np[:] = -1
 		for j in range(len(eddy_track)):

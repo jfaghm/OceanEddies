@@ -24,10 +24,10 @@ def score(path, gate_dist):
 	for i in range(len(path))[1:-1]:
 #		cos_angle = 1
 #		if i > 1:
-#			u = (path[i-1].obj.lon - path[i-2].obj.lon, \
-#				path[i-1].obj.lat - path[i-2].obj.lat)
-#			v = (path[i].obj.lon - path[i-1].obj.lon, \
-#				path[i].obj.lat - path[i-1].obj.lat)
+#			u = (path[i-1].obj.Lon - path[i-2].obj.Lon, \
+#				path[i-1].obj.Lat - path[i-2].obj.Lat)
+#			v = (path[i].obj.Lon - path[i-1].obj.Lon, \
+#				path[i].obj.Lat - path[i-1].obj.Lat)
 #			cos_angle = (u[0]*v[0] + u[1]*v[1]) /   \
 #				(math.sqrt(u[0]**2 + u[1]**2) * \
 #				math.sqrt(v[0]**2 + v[1]**2))
@@ -169,16 +169,18 @@ def build_mht(eddies_data,
 		eddies = mat['eddies'][0]
 		pnodes = get_nodes_at_depth(roots, depth - 1)
 		for i in range(len(eddies)):
-			eddy = Eddy(eddies[i].Lat[0,0],
+			eddy = Eddy(eddies[i].Stats[0,0],
+                eddies[i].Lat[0,0],
 				eddies[i].Lon[0,0],
-				eddies[i].SurfaceArea[0,0],
-				eddies[i].Stats[0,0].PixelIdxList[:,0],
-				eddies[i].ThreshFound[0,0],
 				eddies[i].Amplitude[0,0],
-				eddies[i].MeanGeoSpeed[0,0])
+				eddies[i].ThreshFound[0,0],
+				eddies[i].SurfaceArea[0,0],
+				eddies[i].Date[0,0],
+                eddies[i].Cyc[0,0],
+				eddies[i].MeanGeoSpeed[0,0],
+                eddies[i].DetectedBy[0])
 			if not within_bounds(eddy):
 				continue
-			eddy.id = '[' + dataset[0] + ' ' + str(i+1) + ']'
 			mk_node_and_add(eddy, depth, pnodes, roots, gate_dist)
 
 		if do_lookahead:

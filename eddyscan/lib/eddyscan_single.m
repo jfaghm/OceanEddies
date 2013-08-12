@@ -77,17 +77,16 @@ function [ eddies ] = eddyscan_single(ssh_data, lats, lons, cyc)
                 'PixelIdxList', intensity, 'ConvexImage', 'BoundingBox', ...
                 'Centroid', 'PixelList', 'Solidity', 'Extent', 'Orientation', ...
                 'MajorAxisLength', 'MinorAxisLength');
+            
+            STATS.Intensity = STATS.(intensity);
+            STATS = rmfield(STATS, intensity);
+            
             extPixelIdxList = STATS.PixelIdxList;
             [STATS.PixelIdxList, r, c] = extidx2original(STATS.PixelIdxList);
             if ( (8<STATS.Area) && (STATS.Area<1000) )
                 blobpmtr = bwperim(blobbw);
                 meanpmtr = mean(ssh_extended_data(blobpmtr == 1));
-
-                if cyc==1
-                    amplitude = STATS.MaxIntensity - meanpmtr;
-                elseif cyc==-1
-                    amplitude = meanpmtr - STATS.MinIntensity;
-                end
+                amplitude = cyc*(STATS.Intensity - meanpmtr);
 
                 if ( (amplitude>=1)  && (has_local_maxmin(STATS.PixelIdxList)) )
                     [centroid_lat, centroid_lon] = get_centroid(r,c);

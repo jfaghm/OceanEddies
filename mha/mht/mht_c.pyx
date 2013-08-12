@@ -32,8 +32,8 @@ cdef double get_dist(double lon1, double lat1, double lon2, double lat2):
 
 cdef bint gate(old_node, new_node, double gate_dist):
 	cdef double dist, adj_gate_dist
-	dist = get_dist(old_node.obj.lon, old_node.obj.lat, new_node.obj.lon, new_node.obj.lat)
-	adj_gate_dist = gate_dist - fabs(old_node.obj.lat)
+	dist = get_dist(old_node.obj.Lon, old_node.obj.Lat, new_node.obj.Lon, new_node.obj.Lat)
+	adj_gate_dist = gate_dist - fabs(old_node.obj.Lat)
 	if dist > adj_gate_dist:
 		return False
 	else:
