@@ -30,9 +30,6 @@ cdef double get_dist(double lon1, double lat1, double lon2, double lat2):
 	rad_dist = 2*asin(get_max(get_min(tmp, 1.0), -1.0)) # Force the number to be within the domain
 	return rad_dist * 6371.01 # km
 
-def geodesic_dist(lon1, lat1, lon2, lat2):
-	return get_dist(lon1, lat1, lon2, lat2)
-
 cdef bint gate(old_node, new_node, double gate_dist):
 	cdef double dist, adj_gate_dist
 	dist = get_dist(old_node.obj.lon, old_node.obj.lat, new_node.obj.lon, new_node.obj.lat)
