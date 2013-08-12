@@ -131,8 +131,6 @@ def mk_node_and_add(eddy, depth, pnodes, roots, gate_dist):
 
 def build_mht(eddies_data,
 	cyc,
-	ssh_path,
-	quad_path,
 	prune_depth = 2,
 	within_bounds = lambda x: True,
 	do_lookahead = True,
@@ -144,8 +142,6 @@ def build_mht(eddies_data,
 
 	eddies_data: iterator of tuples which are (date, path)
 	cyc: Use CYCLONIC or ANTICYC
-	ssh_path: Path to ssh file (should have a starting index that matches eddies_data)
-	quad_path: Path to quadrangle area file
 	prune_depth: depth at which to begin pruning (index of 0)
 	within_bounds: function to check whether an eddy should be included in the results
 	do_lookahead: Boolean value whether or not to allow eddies to disappear for one timestep
@@ -169,14 +165,6 @@ def build_mht(eddies_data,
 
 	if depth >= len(eddies_data):
 		return roots, closest
-
-	if do_correction:
-		sf = h5py.File(ssh_path, 'r')
-		ssh = sf['ssh'][...]
-		lats = sf['lat'][...]
-		lons = sf['lon'][...]
-		quadmat = scipy.io.loadmat(quad_path, struct_as_record=False)
-		areamap = quadmat['areamap'][0]
 
 	for dataset in eddies_data[depth:]:
 		start_time = time.mktime(time.localtime())
