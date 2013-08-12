@@ -23,19 +23,16 @@ def load_tracks(src, timesteps):
 			node.final = True
 			node.base_depth = int(track[i,2]-1)
 			node.score = track[i,3]
-			node.closest = track[i,4]
 			node.missing = bool(track[i,7])
 			if parent is None:
 				roots[j] = node
 			else:
 				parent.set_child(node)
 			parent = node
-	closest = mat['closest'].tolist()
 	start_depth = mat['end_depth'][0,0]
 	prune_depth = mat['prune_depth'][0,0]
 	gate_dist = mat['gate_dist'][0,0]
 	return {'roots':roots,
-		'closest':closest,
 		'start_depth':start_depth,
 		'prune_depth':prune_depth,
 		'gate_dist':gate_dist}
@@ -62,7 +59,6 @@ def export_tracks(roots, timesteps, prune_depth):
 						all_tracks[i][j].obj.lon,
 						all_tracks[i][0].base_depth+1+j,
 						all_tracks[i][j].score,
-						all_tracks[i][j].closest,
 						all_tracks[i][j].obj.surf_area,
 						all_tracks[i][j].obj.amp,
 						int(all_tracks[i][j].missing),
@@ -77,7 +73,7 @@ def export_tracks(roots, timesteps, prune_depth):
 		eddies_tracks[i] = eddies_track_np
 	return eddies_tracks
 
-def write_tracks(roots, dest, timesteps, prune_depth, closest, gate_dist = 150):
+def write_tracks(roots, dest, timesteps, prune_depth, gate_dist = 150):
 	"""Write the confirmed portion of the tracks in roots to dest where timesteps is a tuple/list"""
 	eddies_tracks = export_tracks(roots, timesteps, prune_depth)
 	scipy.io.savemat(dest,
@@ -86,7 +82,6 @@ def write_tracks(roots, dest, timesteps, prune_depth, closest, gate_dist = 150):
 		 'end_depth': np.array(len(timesteps)-prune_depth, dtype=np.int),
 		 'prune_depth': np.array(prune_depth, dtype=np.int),
 		 'gate_dist': np.array(gate_dist, dtype=np.float64),
-		 'closest': np.array(closest, dtype=np.float64)},
 		appendmat=False,
 		format='5',
 		oned_as='column')

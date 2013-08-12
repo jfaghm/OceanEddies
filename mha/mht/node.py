@@ -7,7 +7,6 @@ class Node(object):
 	def __init__(self, obj):
 		self.obj = obj
 		self.children = []
-		self.closest = -1
 		self.base_depth = 0
 		self.final = False
 		self.score = 0

@@ -21,9 +21,7 @@ eddies = eddyscan_single(ssh_slice, lat, lon, 1);
 
 ## MHA
 A tracking algorithm that maintains multiple hypothesis and does n-scan pruning.
-MHA is capable of splitting artificially merged eddies (detected by Eddyscan or
-otherwise) and can allow eddies to disappear for one timestep from the data to
-avoid breaking tracks.
+MHA can allow eddies to disappear for one timestep from the data to avoid breaking tracks.
 
 ### Requirements
  + Python
@@ -40,9 +38,9 @@ To build MHA, run ``python setup.py build_ext -b mht``
 ```python
 import mht
 
-roots, closest = mht.build_mht(mht.list_eddies(eddies_path, 'eddies'), mht.CYCLONIC,
+roots = mht.build_mht(mht.list_eddies(eddies_path, 'eddies'), mht.CYCLONIC,
 	prune_depth=2, do_lookahead=True)
-mht.write_tracks(roots, 'cyclonic_tracks.mat', list_dates(eddies_path, 'eddies'), prune_depth, closest)
+mht.write_tracks(roots, 'cyclonic_tracks.mat', list_dates(eddies_path, 'eddies'), prune_depth)
 ```
 
 ### Exporting

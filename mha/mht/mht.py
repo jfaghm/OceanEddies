@@ -138,14 +138,14 @@ def build_mht(eddies_data,
 	prev_data = None,
 	prune_mode = 'parent'):
 	"""
-	Build the multi-hypothesis tree. Returns an (closest, roots) where both are iterators.
+	Build the multi-hypothesis tree. Returns roots as an iterator.
 
 	eddies_data: iterator of tuples which are (date, path)
 	cyc: Use CYCLONIC or ANTICYC
 	prune_depth: depth at which to begin pruning (index of 0)
 	within_bounds: function to check whether an eddy should be included in the results
 	do_lookahead: Boolean value whether or not to allow eddies to disappear for one timestep
-	prev_data: Load previously computed data. Expects a dict with keys roots, closest,
+	prev_data: Load previously computed data. Expects a dict with keys roots,
 	           start_depth (depth at which this instance should start), prune_depth, gate_dist.
 	prune_mode: What method should be used for pruning. Use 'child' for pruning by finding the
 	            ideal parent for a given node. Use 'parent' for pruning by finding the ideal
@@ -153,18 +153,16 @@ def build_mht(eddies_data,
 	"""
 
 	roots = []
-	closest = [] # Used for storing the closest eddy if one is not found
 	depth = 0
 
 	if prev_data is not None:
 		roots = prev_data['roots']
-		closest = prev_data['closest']
 		depth = prev_data['start_depth']
 		prune_depth = prev_data['prune_depth']
 		gate_dist = prev_data['gate_dist']
 
 	if depth >= len(eddies_data):
-		return roots, closest
+		return roots
 
 	for dataset in eddies_data[depth:]:
 		start_time = time.mktime(time.localtime())
@@ -172,7 +170,6 @@ def build_mht(eddies_data,
 		mat = scipy.io.loadmat(dataset[1], struct_as_record=False)
 		eddies = mat['eddies'][0]
 		pnodes = get_nodes_at_depth(roots, depth - 1)
-		c_eddies = []
 		for i in range(len(eddies)):
 			eddy = Eddy(eddies[i].Lat[0,0],
 				eddies[i].Lon[0,0],
@@ -184,11 +181,10 @@ def build_mht(eddies_data,
 			if not within_bounds(eddy):
 				continue
 			eddy.id = '[' + dataset[0] + ' ' + str(i+1) + ']'
-			c_eddies += [eddy]
 			mk_node_and_add(eddy, depth, pnodes, roots, gate_dist)
 
 		if do_lookahead:
-			lookahead.add_lookahead_nodes(pnodes, c_eddies, closest, gate_dist)
+			lookahead.add_lookahead_nodes(pnodes, gate_dist)
 
 		if depth >= prune_depth:
 			if prune_mode == 'parent':
@@ -198,4 +194,4 @@ def build_mht(eddies_data,
 		depth += 1
 		print 'time:', time.mktime(time.localtime())-start_time
 
-	return roots, closest
+	return roots
