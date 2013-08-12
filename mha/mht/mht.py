@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import consts
-import h5py
 import lookahead
 import mht_io as io
 import numpy as np
