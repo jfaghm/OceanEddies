@@ -6,7 +6,7 @@ from collections import deque
 from eddy import Eddy
 from node import Node
 
-def load_tracks(src, timesteps):
+def load_tracks(src):
 	"""Load saved data. Returns a dict with all of the saved values (excluding start_date)."""
 	mat = scipy.io.loadmat(src, struct_as_record=False)
 	tracks = mat['tracks']

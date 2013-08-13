@@ -8,7 +8,7 @@ import mht
 eddies_path = '/path/to/eddyscan/out'
 
 print 'Loading old data...'
-data = mht.load_tracks('cyclonic_tracks.mat', mht.list_dates(eddies_path, 'eddies'))
+data = mht.load_tracks('cyclonic_tracks.mat')
 print 'Tracking...'
 roots = mht.build_mht(mht.list_eddies(eddies_path, 'eddies'), do_lookahead=True, prev_data=data)
 print 'Saving...'
