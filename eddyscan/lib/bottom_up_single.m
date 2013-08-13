@@ -1,4 +1,4 @@
-function [ eddies ] = bottom_up_single(ssh_data, lat, lon, cyc)
+function [ eddies ] = bottom_up_single(ssh_data, lat, lon, areamap, cyc)
 %BOTTOM_UP_SINGLE Finds eddies using the Bottom Up method
 %   Will return an array of struct's that contain the eddy data.
 %   ssh_data: A 2D array of double's that contain the sea surface heights (latsxlons)
@@ -10,9 +10,6 @@ function [ eddies ] = bottom_up_single(ssh_data, lat, lon, cyc)
 
     R = georasterref('LatLim', [-90 90], 'LonLim', [0 360], 'RasterSize', ...
     [721, 1440], 'ColumnsStartFrom', 'south', 'RowsStartFrom', 'west');
-    
-    areamap = load('../data/quadrangle_area_by_lat.mat');
-    areamap = areamap.areamap;
     
     extrema = get_extrema(ssh_data, cyc);
     origExtrema = extrema;

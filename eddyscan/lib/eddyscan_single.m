@@ -1,4 +1,4 @@
-function [ eddies ] = eddyscan_single(ssh_data, lats, lons, cyc)
+function [ eddies ] = eddyscan_single(ssh_data, lats, lons, areamap, cyc)
 %EDDYSCAN_SINGLE Finds eddies using Chelton thresholding and
 %maxima and convex criteria.
 %   Will return an array of struct's that contain the eddy data.
@@ -13,9 +13,6 @@ function [ eddies ] = eddyscan_single(ssh_data, lats, lons, cyc)
     ssh_extended(:,1:200) = ssh_data(:,(end-199):end);
     ssh_extended(:,201:(size(ssh_data,2)+200)) = ssh_data;
     ssh_extended(:,(201+size(ssh_data,2)):end) = ssh_data(:,1:200);
-
-    areamap = load('../data/quadrangle_area_by_lat.mat');
-    areamap = areamap.areamap;
 
     sshnan = sum(isnan(ssh_data(:))) > 0;
     if sshnan
