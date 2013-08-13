@@ -1,3 +1,4 @@
+import consts
 import mht
 import numpy as np
 import scipy.io
@@ -11,6 +12,9 @@ def load_tracks(src, timesteps):
 	tracks = mat['tracks']
 	info = mat['mhaInfo'][0,0]
 	roots = [None]*tracks.shape[0]
+	start_depth = info.EndDepth[0,0]
+	prune_depth = info.PruneDepth[0,0]
+	gate_dist = info.GateDist[0,0]
 	for i in range(tracks.shape[0]):
 		track = tracks[i,0]
 		scores = info.Scores[i,0]
@@ -38,9 +42,8 @@ def load_tracks(src, timesteps):
 			else:
 				parent.set_child(node)
 			parent = node
-	start_depth = info.EndDepth[0,0]
-	prune_depth = info.PruneDepth[0,0]
-	gate_dist = info.GateDist[0,0]
+		parent.final = parent.base_depth < start_depth-1
+		parent.add_child(Node(consts.END))
 	return {'roots': roots,
 		'start_depth': start_depth,
 		'prune_depth': prune_depth,
