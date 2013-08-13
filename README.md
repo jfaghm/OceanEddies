@@ -29,6 +29,7 @@ MHA can allow eddies to disappear for one timestep from the data to avoid breaki
  + Python
  + Cython
  + Scipy
+ + Numpy
 
 ### Build
 To build MHA, run ``python setup.py build_ext -b mht``
