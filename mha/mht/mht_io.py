@@ -9,37 +9,6 @@ def load_tracks(src, timesteps):
 	"""Load saved data. Returns a dict with all of the saved values (excluding start_date)."""
 	mat = scipy.io.loadmat(src, struct_as_record=False)
 	tracks = mat['tracks']
-	roots = [None]*tracks.shape[0]
-	for j in range(tracks.shape[0]):
-		track = tracks[j,0]
-		parent = None
-		for i in range(track.shape[0]):
-			pixels = track[i,10:]
-			pixels = pixels[pixels > -1]
-			eddy = Eddy(track[i,0], track[i,1], track[i,5], pixels, track[i,8],
-				track[i,6], track[i,9])
-			node = Node(eddy)
-			node.final = True
-			node.base_depth = int(track[i,2]-1)
-			node.score = track[i,3]
-			node.missing = bool(track[i,7])
-			if parent is None:
-				roots[j] = node
-			else:
-				parent.set_child(node)
-			parent = node
-	start_depth = mat['end_depth'][0,0]
-	prune_depth = mat['prune_depth'][0,0]
-	gate_dist = mat['gate_dist'][0,0]
-	return {'roots':roots,
-		'start_depth':start_depth,
-		'prune_depth':prune_depth,
-		'gate_dist':gate_dist}
-
-def load_tracks_new(src, timesteps):
-	"""Load saved data. Returns a dict with all of the saved values (excluding start_date)."""
-	mat = scipy.io.loadmat(src, struct_as_record=False)
-	tracks = mat['tracks']
 	info = mat['mhaInfo'][0,0]
 	roots = [None]*tracks.shape[0]
 	for i in range(tracks.shape[0]):
