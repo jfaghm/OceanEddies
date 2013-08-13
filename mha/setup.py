@@ -4,6 +4,7 @@ from Cython.Distutils import build_ext
 
 ext_modules = [Extension("mht_c",
 	["mht/mht_c.pyx"],
+	extra_compile_args=['-O3'],
 	libraries=['m'])
 ]
 
