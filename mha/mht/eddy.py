@@ -18,9 +18,9 @@ class Eddy(object):
 		self.DetectedBy = detectedby
 
 def new_stats_from_mat(stats):
-	return np.array((stats.Area[0,0], stats.Extrema, stats.PixelIdxList[:,0],
-			stats.Intensity[0,0], stats.ConvexImage, stats.BoundingBox[0,:],
-			stats.Centroid[0,:], stats.PixelList, stats.Solidity[0,0],
+	return np.array((stats.Area[0,0], stats.Extrema, stats.PixelIdxList.flatten(),
+			stats.Intensity[0,0], stats.ConvexImage, stats.BoundingBox.flatten(),
+			stats.Centroid.flatten(), stats.PixelList, stats.Solidity[0,0],
 			stats.Extent[0,0], stats.Orientation[0,0], stats.MajorAxisLength[0,0],
 			stats.MinorAxisLength[0,0]), dtype=[('Area', 'float64'), ('Extrema', 'object'),
 				('PixelIdxList', 'object'), ('Intensity', 'float64'),
