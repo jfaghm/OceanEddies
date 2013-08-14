@@ -17,16 +17,6 @@ class Eddy(object):
 		self.MeanGeoSpeed = geo_speed
 		self.DetectedBy = detectedby
 
-	def __hash__(self):
-		return (int(self.Lat << 4) ^ int(self.Lon << 4)) << 25 ^ int(self.Date)
-
-	def __eq__(self, other):
-		return self.Lat == other.Lat and self.Lon == other.Lon and self.Date == other.Date
-
-	def __ne__(self, other):
-		return not self.__eq__(other)
-		
-
 def new_stats_from_mat(stats):
 	return np.array((stats.Area[0,0], stats.Extrema, stats.PixelIdxList.flatten(),
 			stats.Intensity[0,0], stats.ConvexImage, stats.BoundingBox.flatten(),
