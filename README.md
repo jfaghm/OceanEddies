@@ -21,6 +21,12 @@ lon(lon >= 180) = lon(lon >= 180)-360;
 eddies = scan_single(ssh_slice, lat, lon, 'anticyc', 'v2');
 ```
 
+## LNN
+A tracking algorithm (now surpassed by MHA) for eddies.
+
+### Requirements
+ + Matlab
+
 ## MHA
 A tracking algorithm that maintains multiple hypothesis and does n-scan pruning.
 MHA can allow eddies to disappear for one timestep from the data to avoid breaking tracks.
@@ -43,7 +49,3 @@ eddies_path = '/path/to/eddyscan/out'
 roots = mht.build_mht(mht.list_eddies(eddies_path, 'eddies'), do_lookahead=True)
 mht.write_tracks(roots, 'cyclonic_tracks.mat', mht.list_dates(eddies_path, 'eddies'))
 ```
-
-### Exporting
-To convert data from the representation used by MHA to a two dimensional table
-format, use ``mha_export``. Note that this requires MATLAB to run.
