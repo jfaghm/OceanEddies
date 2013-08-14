@@ -1,4 +1,4 @@
-function [ eddies ] = scan_single( ssh, lat, lon, cyc, scan_type )
+function [ eddies ] = scan_single( ssh, lat, lon, date, cyc, scan_type )
 %SCAN_SINGLE Wrapper function to do scanning
 % ssh: ssh slice with nans for land
 % cyc: 'anticyc' or 'cyclonic'
@@ -35,6 +35,7 @@ function [ eddies ] = scan_single( ssh, lat, lon, cyc, scan_type )
             end
             eddies = get_combined_eddy_frames(eddies_out{2}, eddies_out{1}, ssh);
     end
+    [eddies.Date] = deal(date);
     
     path(oldpath);
 
