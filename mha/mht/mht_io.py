@@ -119,7 +119,7 @@ def write_tracks(roots, dest, timesteps, prune_depth = 2, gate_dist = 150):
 		appendmat=False,
 		format='5',
 		oned_as='column',
-		do_compression=True)
+		do_compression=False)
 
 def fmt_print_with_no_root(e_instances, child_score):
 	"""Prints out eddies that don't have an instance that starts a new track"""
