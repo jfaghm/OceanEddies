@@ -198,61 +198,13 @@ function [ eddies ] = eddyscan_single(ssh_data, lats, lons, areamap, cyc)
     
     function [bool] = has_local_maxmin( pxidxs )
         bool = false;
-        if cyc==1
-            % For anticyclic we need to find local max
-            pixcount = 1;
-            while (~bool) && (pixcount<=length(pxidxs))
-                % Iterate through pixels, if max is found return true.
-                delta_i = -1;
-                delta_j = -1;
-                [i, j] = ind2sub(size(ssh_data), pxidxs(pixcount));
+        [px_i, px_j] = ind2sub(size(ssh_data), pxidxs);
+        for ii = 1:length(pxidxs)
+            corei = px_i(ii)-1:px_i(ii)+1;
+            corej = mod(px_j(ii)-2:px_j(ii), size(ssh_data, 2))+1;
+            if sum(sum(cyc.*ssh_data(pxidxs(ii)) > cyc.*ssh_data(corei, corej))) == 8
                 bool = true;
-                while bool && (delta_i<=1)
-                    while bool && (delta_j<=1)
-                        if delta_i||delta_j % Avoid comparing pixel to itself.
-                            compi = mod(i + delta_i, size(ssh_data,1));
-                            if ~compi
-                                compi = size(ssh_data, 1);
-                            end
-                            compj = mod(j + delta_j, size(ssh_data,2));
-                            if ~compj
-                                compj = size(ssh_data, 2);
-                            end
-                            bool = ssh_data(i,j)>ssh_data(compi,compj);
-                        end
-                        delta_j=delta_j+1;
-                    end
-                    delta_i=delta_i+1;
-                end
-                pixcount = pixcount+1;
-            end
-        elseif cyc==-1
-            % Local min.
-            pixcount = 1;
-            while (~bool) && (pixcount<=length(pxidxs))
-                % Iterate through pixels, if max is found return true.
-                delta_i = -1;
-                delta_j = -1;
-                [i, j] = ind2sub(size(ssh_data), pxidxs(pixcount));
-                bool = true;
-                while bool && (delta_i<=1)
-                    while bool && (delta_j<=1)
-                        if delta_i||delta_j % Avoid comparing pixel to itself.
-                            compi = mod(i + delta_i, size(ssh_data,1));
-                            if ~compi
-                                compi = size(ssh_data, 1);
-                            end
-                            compj = mod(j + delta_j, size(ssh_data,2));
-                            if ~compj
-                                compj = size(ssh_data, 2);
-                            end
-                            bool = ssh_data(i,j)<ssh_data(compi,compj);
-                        end
-                        delta_j=delta_j+1;
-                    end
-                    delta_i=delta_i+1;
-                end
-                pixcount = pixcount+1;
+                return;
             end
         end
     end
