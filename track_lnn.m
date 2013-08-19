@@ -15,17 +15,37 @@ function [ tracks, startDate ] = track_lnn(cell_eddies, dates)
     
     for i = 1:length(stitched)
         cur = stitched{i};
-        clear frames;
+        frames.Stats = cell(size(cur, 1), 1);
+        frames.Lat = zeros(size(cur, 1), 1, 'double');
+        frames.Lon = zeros(size(cur, 1), 1, 'double');
+        frames.Amplitude = zeros(size(cur, 1), 1, 'double');
+        frames.ThreshFound = zeros(size(cur, 1), 1, 'double');
+        frames.SurfaceArea = zeros(size(cur, 1), 1, 'double');
+        frames.Date = zeros(size(cur, 1), 1, 'double');
+        frames.Cyc = zeros(size(cur, 1), 1, 'int16');
+        frames.MeanGeoSpeed = zeros(size(cur, 1), 1, 'double');
+        frames.DetectedBy = cell(size(cur, 1), 1);
         for j = 1:size(cur, 1)
-            frames(j) = cell_eddies{cur(j,1)}(cur(j,2));
+            es = cell_eddies{cur(j,1)}(cur(j,2));
+            frames.Stats{j} = es.Stats;
+            frames.Lat(j) = es.Lat;
+            frames.Lon(j) = es.Lon;
+            frames.Amplitude(j) = es.Amplitude;
+            frames.ThreshFound(j) = es.ThreshFound;
+            frames.SurfaceArea(j) = es.SurfaceArea;
+            frames.Date(j) = es.Date;
+            frames.Cyc(j) = es.Cyc;
+            frames.MeanGeoSpeed(j) = es.MeanGeoSpeed;
+            frames.DetectedBy{j} = es.DetectedBy;
+            frames.Stats{j} = es.Stats;frames.Stats{j} = es.Stats;
             eddies_mask{cur(j,1)}(cur(j,2)) = false;
         end
         sindex = cur(1,1);
         sdate = dates(sindex);
         tracks(i).StartDate = sdate;
         tracks(i).StartIndex = sindex;
-        tracks(i).Length = length(frames);
-        tracks(i).Frames = frames;
+        tracks(i).Length = length(frames.Lat);
+        tracks(i).Eddies = frames;
     end
     
     for i = 1:length(eddies_mask)
@@ -41,10 +61,10 @@ end
 function [ strack ] = new_track_st(sDate, sIndex, len, frames)
     if nargin
         strack = struct('StartDate', sDate, 'StartIndex', sIndex, ...
-            'Length', len, 'Frames', frames);
+            'Length', len, 'Eddies', frames);
     else
         strack = struct('StartDate', {}, 'StartIndex', {}, ...
-            'Length', {}, 'Frames', {});
+            'Length', {}, 'Eddies', {});
     end
 end
 
