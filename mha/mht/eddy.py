@@ -19,13 +19,11 @@ class Eddy(object):
 
 def new_stats_from_mat(stats):
 	return np.array((stats.Area[0,0], stats.Extrema, stats.PixelIdxList.flatten(),
-			stats.Intensity[0,0], stats.ConvexImage, stats.BoundingBox.flatten(),
-			stats.Centroid.flatten(), stats.PixelList, stats.Solidity[0,0],
+			stats.Intensity[0,0], stats.ConvexImage, stats.Solidity[0,0],
 			stats.Extent[0,0], stats.Orientation[0,0], stats.MajorAxisLength[0,0],
-			stats.MinorAxisLength[0,0]), dtype=[('Area', 'float64'), ('Extrema', 'object'),
-				('PixelIdxList', 'object'), ('Intensity', 'float64'),
-				('ConvexImage', 'object'), ('BoundingBox', 'object'),
-				('Centroid', 'object'), ('PixelList', 'object'),
+			stats.MinorAxisLength[0,0]), dtype=[('Area', 'float64'),
+				('Extrema', 'object'), ('PixelIdxList', 'object'),
+				('Intensity', 'float64'), ('ConvexImage', 'object'),
 				('Solidity', 'float64'), ('Extent', 'float64'),
 				('Orientation', 'float64'), ('MajorAxisLength', 'float64'),
 				('MinorAxisLength', 'float64')])
