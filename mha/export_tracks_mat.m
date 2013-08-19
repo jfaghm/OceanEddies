@@ -3,12 +3,10 @@ function [ old_tracks ] = export_tracks_mat( tracks )
 % tracks: new, struct based tracks list
     old_tracks = cell(size(tracks));
     for i = 1:length(tracks)
-        old = zeros(tracks(i).Length, 4);
-        old(:,1) = [tracks(i).Frames.Lat];
-        old(:,2) = [tracks(i).Frames.Lon];
-        old(:,3) = double(tracks(i).StartIndex)+(1:tracks(i).Length)-1;
-        old(:,4) = NaN;
-        old_tracks{i} = old;
+        old_tracks{i} = [tracks(i).Eddies.Lat ...
+            tracks(i).Eddies.Lon ...
+            double(tracks(i).StartIndex)+(0:tracks(i).Length-1)' ...
+            nan(tracks(i).Length, 1)];
     end
 end
 
