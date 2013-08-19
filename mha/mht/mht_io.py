@@ -19,19 +19,19 @@ def load_tracks(src):
 		track = tracks[i,0]
 		scores = info.Scores[i,0]
 		missings = info.Missing[i,0].astype('bool')
-		frames = track.Frames.flatten()
+		frames = track.Eddies[0,0]
 		parent = None
-		for j in range(frames.shape[0]):
-			eddy = Eddy(frames[j].Stats[0,0],
-				frames[j].Lat[0,0],
-				frames[j].Lon[0,0],
-				frames[j].Amplitude[0,0],
-				frames[j].ThreshFound[0,0],
-				frames[j].SurfaceArea[0,0],
-				frames[j].Date[0,0],
-				frames[j].Cyc[0,0],
-				frames[j].MeanGeoSpeed[0,0],
-				frames[j].DetectedBy[0])
+		for j in range(track.Length[0,0]):
+			eddy = Eddy(frames.Stats[j,0][0,0],
+				frames.Lat[j,0],
+				frames.Lon[j,0],
+				frames.Amplitude[j,0],
+				frames.ThreshFound[j,0],
+				frames.SurfaceArea[j,0],
+				frames.Date[j,0],
+				frames.Cyc[j,0],
+				frames.MeanGeoSpeed[j,0],
+				frames.DetectedBy[j,0][0])
 			node = Node(eddy)
 			node.final = True
 			node.base_depth = track.StartIndex[0,0]+j-1
@@ -68,40 +68,60 @@ def export_tracks(roots, timesteps, prune_depth = 2):
 	all_tracks = tuple(set(all_tracks))
 	
 	eddies_tracks = np.zeros(len(all_tracks), dtype=[('StartDate', 'i4'),
-		('StartIndex', 'i4'), ('Length', 'u2'), ('Frames', 'object')])
+		('StartIndex', 'i4'), ('Length', 'u2'), ('Eddies', 'object')])
 	scores_tracks = np.zeros(len(all_tracks), dtype='object')
 	missings_tracks = np.zeros(len(all_tracks), dtype='object')
 	for i in range(len(all_tracks)):
 		truelen = 0
-		eddy_frames = np.zeros(len(all_tracks[i]), dtype=[('Stats', 'object'),
-			('Lat', 'f8'), ('Lon', 'f8'), ('Amplitude', 'f8'),
-			('ThreshFound', 'f8'), ('SurfaceArea', 'f8'), ('Date', 'f8'), ('Cyc', 'i2'),
-			('MeanGeoSpeed', 'f8'), ('DetectedBy', 'object')])
+		stats = np.zeros(len(all_tracks[i]), dtype='object')
+		lat = np.zeros(len(all_tracks[i]), dtype='f8')
+		lon = np.zeros(len(all_tracks[i]), dtype='f8')
+		amp = np.zeros(len(all_tracks[i]), dtype='f8')
+		thf = np.zeros(len(all_tracks[i]), dtype='f8')
+		sa = np.zeros(len(all_tracks[i]), dtype='f8')
+		date = np.zeros(len(all_tracks[i]), dtype='f8')
+		cyc = np.zeros(len(all_tracks[i]), dtype='i2')
+		geo = np.zeros(len(all_tracks[i]), dtype='f8')
+		dby = np.zeros(len(all_tracks[i]), dtype='object')
 		scores = np.zeros(len(all_tracks[i]), dtype='f8')
 		missings = np.zeros(len(all_tracks[i]), dtype='b')
 		for j in range(len(all_tracks[i])):
 			if type(all_tracks[i][j].obj) is Eddy:
-				eddy_frames[j]['Stats'] = all_tracks[i][j].obj.Stats
-				eddy_frames[j]['Lat'] = all_tracks[i][j].obj.Lat
-				eddy_frames[j]['Lon'] = all_tracks[i][j].obj.Lon
-				eddy_frames[j]['Amplitude'] = all_tracks[i][j].obj.Amplitude
-				eddy_frames[j]['ThreshFound'] = all_tracks[i][j].obj.ThreshFound
-				eddy_frames[j]['SurfaceArea'] = all_tracks[i][j].obj.SurfaceArea
-				eddy_frames[j]['Date'] = all_tracks[i][j].obj.Date
-				eddy_frames[j]['Cyc'] = all_tracks[i][j].obj.Cyc
-				eddy_frames[j]['MeanGeoSpeed'] = all_tracks[i][j].obj.MeanGeoSpeed
-				eddy_frames[j]['DetectedBy'] = all_tracks[i][j].obj.DetectedBy
+				stats[j] = all_tracks[i][j].obj.Stats
+				lat[j] = all_tracks[i][j].obj.Lat
+				lon[j] = all_tracks[i][j].obj.Lon
+				amp[j] = all_tracks[i][j].obj.Amplitude
+				thf[j] = all_tracks[i][j].obj.ThreshFound
+				sa[j] = all_tracks[i][j].obj.SurfaceArea
+				date[j] = all_tracks[i][j].obj.Date
+				cyc[j] = all_tracks[i][j].obj.Cyc
+				geo[j] = all_tracks[i][j].obj.MeanGeoSpeed
+				dby[j] = all_tracks[i][j].obj.DetectedBy
 				scores[j] = all_tracks[i][j].score
 				missings[j] = all_tracks[i][j].missing
 				truelen = j
-		eddy_frames = eddy_frames[:truelen+1]
+		stats = stats[:truelen+1]
+		lat = lat[:truelen+1]
+		lon = lon[:truelen+1]
+		amp = amp[:truelen+1]
+		thf = thf[:truelen+1]
+		sa = sa[:truelen+1]
+		date = date[:truelen+1]
+		cyc = cyc[:truelen+1]
+		geo = geo[:truelen+1]
+		dby = dby[:truelen+1]
+		eddy_frames = np.array((stats, lat, lon, amp, thf, sa, date, cyc, geo, dby), dtype=[
+			('Stats', 'object'), ('Lat', 'object'), ('Lon', 'object'),
+			('Amplitude', 'object'), ('ThreshFound', 'object'),
+			('SurfaceArea', 'object'), ('Date', 'object'), ('Cyc', 'object'),
+			('MeanGeoSpeed', 'object'), ('DetectedBy', 'object')])
 		scores = scores[:truelen+1]
 		missings = missings[:truelen+1]
 
 		eddies_tracks[i]['StartDate'] = int(timesteps[all_tracks[i][0].base_depth])
 		eddies_tracks[i]['StartIndex'] = all_tracks[i][0].base_depth + 1 # Matlab indexing
-		eddies_tracks[i]['Length'] = len(eddy_frames)
-		eddies_tracks[i]['Frames'] = eddy_frames
+		eddies_tracks[i]['Length'] = len(lat)
+		eddies_tracks[i]['Eddies'] = eddy_frames
 		scores_tracks[i] = scores
 		missings_tracks[i] = missings
 	return eddies_tracks, scores_tracks, missings_tracks
