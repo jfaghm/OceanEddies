@@ -22,7 +22,7 @@ eddies = scan_single(ssh_slice, lat, lon, 'anticyc', 'v2');
 ```
 
 ## LNN
-A tracking algorithm (now surpassed by MHA) for eddies.
+A tracking algorithm (surpassed by MHA) for eddies.
 
 ### Requirements
  + Matlab
