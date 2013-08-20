@@ -1,7 +1,6 @@
-function [ tracks, startDate ] = track_lnn(cell_eddies, dates)
+function tracks = track_lnn(cell_eddies)
     p_eddies = cell(size(cell_eddies));
     eddies_mask = cell(size(cell_eddies));
-    startDate = dates(1);
     
     for i = 1:length(cell_eddies)
         p_eddies{i} = [[cell_eddies{i}.Lat]' [cell_eddies{i}.Lon]' ...
@@ -9,67 +8,11 @@ function [ tracks, startDate ] = track_lnn(cell_eddies, dates)
         eddies_mask{i} = true(size(cell_eddies{i}));
     end
     
-    stitched = stitch_lnn(p_eddies);
-    tracks = new_track_st();
-    tracks(length(stitched)).StartIndex = NaN;
-    
-    for i = 1:length(stitched)
-        cur = stitched{i};
-        frames.Stats = cell(size(cur, 1), 1);
-        frames.Lat = zeros(size(cur, 1), 1, 'double');
-        frames.Lon = zeros(size(cur, 1), 1, 'double');
-        frames.Amplitude = zeros(size(cur, 1), 1, 'double');
-        frames.ThreshFound = zeros(size(cur, 1), 1, 'double');
-        frames.SurfaceArea = zeros(size(cur, 1), 1, 'double');
-        frames.Date = zeros(size(cur, 1), 1, 'double');
-        frames.Cyc = zeros(size(cur, 1), 1, 'int16');
-        frames.MeanGeoSpeed = zeros(size(cur, 1), 1, 'double');
-        frames.DetectedBy = cell(size(cur, 1), 1);
-        for j = 1:size(cur, 1)
-            es = cell_eddies{cur(j,1)}(cur(j,2));
-            frames.Stats{j} = es.Stats;
-            frames.Lat(j) = es.Lat;
-            frames.Lon(j) = es.Lon;
-            frames.Amplitude(j) = es.Amplitude;
-            frames.ThreshFound(j) = es.ThreshFound;
-            frames.SurfaceArea(j) = es.SurfaceArea;
-            frames.Date(j) = es.Date;
-            frames.Cyc(j) = es.Cyc;
-            frames.MeanGeoSpeed(j) = es.MeanGeoSpeed;
-            frames.DetectedBy{j} = es.DetectedBy;
-            frames.Stats{j} = es.Stats;frames.Stats{j} = es.Stats;
-            eddies_mask{cur(j,1)}(cur(j,2)) = false;
-        end
-        sindex = cur(1,1);
-        sdate = dates(sindex);
-        tracks(i).StartDate = sdate;
-        tracks(i).StartIndex = sindex;
-        tracks(i).Length = length(frames.Lat);
-        tracks(i).Eddies = frames;
-    end
-    
-    for i = 1:length(eddies_mask)
-        for j = find(eddies_mask{i})
-            tracks(length(tracks)+1) = new_track_st(dates(i), i, 1, ...
-                cell_eddies{i}(j));
-        end
-    end
-    
-    tracks = tracks';
-end
-
-function [ strack ] = new_track_st(sDate, sIndex, len, frames)
-    if nargin
-        strack = struct('StartDate', sDate, 'StartIndex', sIndex, ...
-            'Length', len, 'Eddies', frames);
-    else
-        strack = struct('StartDate', {}, 'StartIndex', {}, ...
-            'Length', {}, 'Eddies', {});
-    end
+    tracks = stitch_lnn(p_eddies);
 end
 
 function [ tracks ] = stitch_lnn( eddies )
-% Will use LNN tracking to provide cell array with [tstep index] matrices
+% Will use LNN tracking to provide cell array with [lat lon tstep index] matrices
 % as the values
 % eddies: cell-array of matrices formatted [lat lon amp sa]
     tracks = {};
@@ -136,7 +79,7 @@ function [ tracks ] = stitch_lnn( eddies )
                     targs(trows(knnidx(sortidx(ed))),6) = id;
                     tlat = targs(trows(knnidx(sortidx(ed))),1);
                     tlon = targs(trows(knnidx(sortidx(ed))),2);
-                    tracks{id}(end+1,:) = [t trows(knnidx(sortidx(ed)))];
+                    tracks{id}(end+1,:) = [tlat tlon t trows(knnidx(sortidx(ed)))];
                 end
             end
 
@@ -196,8 +139,8 @@ function [ tracks ] = stitch_lnn( eddies )
                     qlon = queries(qrows(sortidx(ed)),2);
                     tlat = targs(trows(knnidx(sortidx(ed))),1);
                     tlon = targs(trows(knnidx(sortidx(ed))),2);
-                    tracks{next_id} = [(t-1) qrows(sortidx(ed))];
-                    tracks{next_id}(2,:) = [t trows(knnidx(sortidx(ed)))];
+                    tracks{next_id} = [qlat qlon (t-1) qrows(sortidx(ed))];
+                    tracks{next_id}(2,:) = [tlat tlon t trows(knnidx(sortidx(ed)))];
                     next_id = next_id + 1;
                 end
             end
