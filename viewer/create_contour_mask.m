@@ -1,4 +1,6 @@
 function [ contour_mask ] = create_contour_mask( cell_eddies, ssh )
+%CREATE_CONTOUR_MASK Saves contour mask. Will save output for use in viewer
+%if no data is expected (ie. contour_mask is not returned).
     contour_mask = false(size(ssh,1), size(ssh,2), length(cell_eddies));
     parfor i = 1:length(cell_eddies)
         slice = false(size(ssh));
@@ -9,6 +11,6 @@ function [ contour_mask ] = create_contour_mask( cell_eddies, ssh )
     end
     
     if nargout < 1
-        save('contours', 'contour_mask', '-v7.3');
+        save('global/contours', 'contour_mask', '-v7.3');
     end
 end
