@@ -49,3 +49,18 @@ eddies_path = '/path/to/eddyscan/out'
 roots = mht.build_mht(mht.list_eddies(eddies_path, 'eddies'), do_lookahead=True)
 mht.write_tracks(roots, 'cyclonic_tracks.mat', mht.list_dates(eddies_path, 'eddies'))
 ```
+
+## Eddy track viewer
+This eddy viewer will display eddy tracks with the bodies borders layed on top of the ssh data.
+It allows moving back and forth, and requires you to subset the data for performance (the subset
+could consist of the entire world, but that would not give any performance boost).
+
+### Requirements
+ + Matlab
+
+### Example Usage
+```matlab
+mk_global_data; % Need to modify script according to your setup
+mk_all_subsets; % May need to modify, how the globe is split into subsets is defined here
+load_and_plot('subsets/swpacific');
+```
