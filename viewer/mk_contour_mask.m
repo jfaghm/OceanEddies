@@ -1,5 +1,5 @@
-function [ contour_mask ] = create_contour_mask( cell_eddies, ssh )
-%CREATE_CONTOUR_MASK Saves contour mask. Will save output for use in viewer
+function [ contour_mask ] = mk_contour_mask( cell_eddies, ssh )
+%MK_CONTOUR_MASK Saves contour mask. Will save output for use in viewer
 %if no data is expected (ie. contour_mask is not returned).
     contour_mask = false(size(ssh,1), size(ssh,2), length(cell_eddies));
     parfor i = 1:length(cell_eddies)
