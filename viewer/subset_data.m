@@ -1,6 +1,7 @@
 function subset_data(ssh, lat, lon, dates, latmin, latmax, lonmin, lonmax, dest)
 %SUBSET_DATA This will subset the data and save all of the data into dest
 %(as one file, not multiple small files like the global data)
+    fprintf('  GEN  %s\n', dest);
     % Correct bounds
     t = load('global/contours');
     contour_mask = t.contour_mask;
@@ -44,8 +45,7 @@ function subset_data(ssh, lat, lon, dates, latmin, latmax, lonmin, lonmax, dest)
     lonlim = [lonmin lonmax];
 
     save(dest, 'daterefs_cell', 'ssh', 'dates', 'lat', 'lon', ...
-        'contour_mask', 'tracks_cell', 'latlim', 'lonlim');
-
+        'contour_mask', 'tracks_cell', 'tracks_names', 'latlim', 'lonlim');
 end
 
 function [ ss ] = subset_tracks(tracks, latmin, latmax, lonmin, lonmax)
