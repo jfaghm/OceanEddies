@@ -60,7 +60,10 @@ could consist of the entire world, but that would not give any performance boost
 
 ### Example Usage
 ```matlab
+% Must have loaded ssh data, expects ssh, lat, lon, dates
+% ssh should use NaNs for land
+
 mk_global_data; % Need to modify script according to your setup
-mk_all_subsets; % May need to modify, how the globe is split into subsets is defined here
+mk_all_subsets; % May need to modify. Which subsets are generated are in this file
 load_and_plot('subsets/swpacific');
 ```
