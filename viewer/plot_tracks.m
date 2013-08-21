@@ -9,12 +9,6 @@ function plot_tracks( tracks_cell, tracks_names, daterefs_cell, ...
     ffig = figure;
     axesm('pcarre', 'MapLatLimit', latlim, 'MapLonLimit', lonlim);
     colormapeditor;
-%     worldmap(latlim, lonlim);
-%     f = gca;
-%     colormap('winter');
-%     gfig = figure;
-%     g = gca;
-%     colormap(g, 'winter');
 
     nextPressed = false;
     prevPressed = false;
@@ -59,15 +53,10 @@ function plot_tracks( tracks_cell, tracks_names, daterefs_cell, ...
                 plotm(tracks{tidx}(cpos,1:2), [COLORS{j} 's']);
             end
         end
-%         copyobj(allchild(f), g);
-%         h = pcolor(f, colored(:,:,i));
-%         hssh = pcolor(g, ssh(:,:,i));
         slice = ssh(:,:,i);
         slice(contours(:,:,i)) = max(slice(:))+0.1*range(slice(:));
         pcolorm(lat, lon, slice);
         legend(leg_hdls, tracks_names);
-%         set(h, 'EdgeColor', 'none');
-%         set(hssh, 'EdgeColor', 'none');
         while ~done && ~prevPressed && ~nextPressed && ~loop && ~reset
             pause(0.1);
         end
@@ -97,13 +86,9 @@ function plot_tracks( tracks_cell, tracks_names, daterefs_cell, ...
         end
         set(0, 'CurrentFigure', ffig)
         clma();
-%         delete(hdls);
-%         delete(allchild(f));
-%         delete(allchild(g));
     end
     close(ffig);
     close(hdls.fig);
-%     close(gfig);
 
 end
 
