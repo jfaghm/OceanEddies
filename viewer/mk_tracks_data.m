@@ -9,8 +9,8 @@ function mk_tracks_data( varargin )
     tracks_cell = cell(nargin/2, 1);
     tracks_names = cell(nargin/2, 1);
     for i = 1:2:nargin
-        tracks_names = varargin{i};
-        tracks_cell = varargin{i+1};
+        tracks_names{int64((i+1)/2)} = varargin{i};
+        tracks_cell{int64((i+1)/2)} = varargin{i+1};
     end
     
     save('global/tracks', 'tracks_names', 'tracks_cell');
