@@ -30,7 +30,7 @@ def score(path, gate_dist):
 #			cos_angle = (u[0]*v[0] + u[1]*v[1]) /   \
 #				(math.sqrt(u[0]**2 + u[1]**2) * \
 #				math.sqrt(v[0]**2 + v[1]**2))
-		sum += ( gate_dist - path[i].dist ) #* (1 - cos_angle) )
+		sum += ( gate_dist - path[i].dist ) / (1<<(i-1)) #* (1 - cos_angle) )
 	return sum
 
 def get_eddy_instances(parents, root_nodes, gate_dist):
