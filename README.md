@@ -38,12 +38,12 @@ MHA can allow eddies to disappear for one timestep from the data to avoid breaki
  + Numpy
 
 ### Build
-To build MHA, run ``python setup.py build_ext -b mht`` in [mha/](mha/)
+To build MHA, run ``python setup.py build_ext -b mht`` in [mha/](mha/).
 
 ### Example Usage
 MHA can be called from within MATLAB, the command line, or python. See
-[mha/track_mha.m](mha/track_mha.m) and [mha/track_mha.py](mha/track_mha.py) for running from MATLAB
-or the command line respectively. Below is an example for using MHA in python.
+[track_mha.m](mha/track_mha.m) and [track_mha.py](mha/track_mha.py) for running from MATLAB or the
+command line respectively. Below is an example for using MHA in python.
 ```python
 import mht
 
