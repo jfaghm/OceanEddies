@@ -9,8 +9,13 @@ function track_mha(srcdir, srcpattern, lookahead, load_data, destmat)
     if isa(load_data, 'numeric')
         load_data = '0';
     end
-    cmd = sprintf('python track_mha.py "%s" "%s" %d "%s" "%s"', srcdir, ...
-        srcpattern, lookahead, load_data, destmat);
+    
+    mha_path = mfilename('fullpath');
+    sep = strfind(mha_path, filesep());
+    mha_path = [mha_path(1:sep(end)) 'track_mha.py'];
+    
+    cmd = sprintf('python "%s" "%s" "%s" %d "%s" "%s"', mha_path, ...
+        srcdir, srcpattern, lookahead, load_data, destmat);
     status = system(cmd, '-echo');
     if status
         error('Failed to run MHA');
