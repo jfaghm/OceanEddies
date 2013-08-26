@@ -9,7 +9,10 @@ SSH data.
 ### Requirements
  + Matlab
 
-### Example Usage
+### Usage
+There are two scripts which can be used to call eddyscan: [scan_single.m](eddyscan/scan_single.m]
+and [scan_ssh_subset.m](eddyscan/scan_ssh_subset.m). The second script is can be used to scan many
+timesteps at once. Below is an example for using ``scan_single.m``:
 ```matlab
 % Find all anticyclonic eddies
 ssh_slice = ncread('ssh_data.nc', 'Grid_0001');
@@ -27,6 +30,9 @@ A tracking algorithm (surpassed by MHA) for eddies.
 ### Requirements
  + Matlab
 
+### Usage
+See [track_lnn.m](track_lnn.m).
+
 ## MHA
 A tracking algorithm that maintains multiple hypothesis and does n-scan pruning.
 MHA can allow eddies to disappear for one timestep from the data to avoid breaking tracks.
@@ -43,7 +49,7 @@ To build MHA, run ``python setup.py build_ext -b mht`` in [mha/](mha/).
 ### Example Usage
 MHA can be called from within MATLAB, the command line, or python. See
 [track_mha.m](mha/track_mha.m) and [track_mha.py](mha/track_mha.py) for running from MATLAB or the
-command line respectively. Below is an example for using MHA in python.
+command line respectively. Below is an example for using MHA in python:
 ```python
 import mht
 
