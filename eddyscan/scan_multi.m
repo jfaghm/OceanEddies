@@ -1,6 +1,6 @@
-function scan_ssh_subset( ssh, lat, lon, dates, cyc, scan_type, destdir )
-%SCAN_SSH_SUBSET Scan all of the ssh data passed in (will function
-%correctly if data passed in is a subset)
+function scan_multi( ssh, lat, lon, dates, cyc, scan_type, destdir )
+%SCAN_MULTI Scan all of the ssh data passed in (will function correctly if data
+%passed in is a subset)
     if ~strcmp(destdir(end), filesep())
         destdir = [destdir filesep()];
     end
