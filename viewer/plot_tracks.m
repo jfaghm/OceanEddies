@@ -36,10 +36,12 @@ function plot_tracks( tracks_cell, tracks_names, daterefs_cell, ...
     leg_hdls = zeros(size(daterefs_cell));
     while ~done
         set(0, 'CurrentFigure', ffig)
+        notracks = false;
         for j = 1:length(daterefs_cell)
             dateref = daterefs_cell{j};
             tracks = tracks_cell{j};
             if isempty(dateref{i})
+                notracks = true;
                 continue;
             end
             tidx = dateref{i}(1);
@@ -49,14 +51,16 @@ function plot_tracks( tracks_cell, tracks_names, daterefs_cell, ...
             for k = 2:length(dateref{i})
                 tidx = dateref{i}(k);
                 cpos = tracks{tidx}(:,3) == i;
-                plotm(tracks{tidx}(:,1:2), COLORS{j});
-                plotm(tracks{tidx}(cpos,1:2), [COLORS{j} 's']);
+                plotm(repmat([0 (j-1)*0.1], size(tracks{tidx}, 1), 1)+tracks{tidx}(:,1:2), COLORS{j});
+                plotm([0 (j-1)*0.1]+tracks{tidx}(cpos,1:2), [COLORS{j} 's']);
             end
         end
         slice = ssh(:,:,i);
         slice(contours(:,:,i)) = max(slice(:))+0.1*range(slice(:));
         pcolorm(lat, lon, slice);
-        legend(leg_hdls, tracks_names);
+        if ~notracks
+            legend(leg_hdls, tracks_names);
+        end
         while ~done && ~prevPressed && ~nextPressed && ~loop && ~reset
             pause(0.1);
         end
