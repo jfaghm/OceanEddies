@@ -1,6 +1,13 @@
 function scan_multi( ssh, lat, lon, dates, cyc, scan_type, destdir )
 %SCAN_MULTI Scan all of the ssh data passed in (will function correctly if data
 %passed in is a subset)
+% ssh: ssh cube with nans for land
+% cyc: 'anticyc' or 'cyclonic'
+% scan_type: 'v1', 'v2', 'hybrid'
+%         v1: Will run top-down scanning
+%         v2: Will run bottom-up scanning from the minima of the field
+%     hybrid: Will run v2 and v1 scanning and will take the union of the
+%             two sets where, for common features, v2 bodies will be used
     if ~strcmp(destdir(end), filesep())
         destdir = [destdir filesep()];
     end
