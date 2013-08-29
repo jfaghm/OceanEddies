@@ -12,7 +12,7 @@ def usage():
 	print '                anticyc_19921014.mat)'
 	print '    lookahead:  Boolean value to run the scan with lookahead enabled [0 or 1]'
 	print '    load data:  Path to pre-generated data. Use 0 to load no data.'
-	print '    destmat:    Path to saved mat-file. (should end in .mat)'
+	print '    destmat:    Path to save mat-file(s). (should NOT end in .mat)'
 
 if len(sys.argv) != 6:
 	usage()

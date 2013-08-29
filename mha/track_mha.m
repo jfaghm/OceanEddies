@@ -5,7 +5,7 @@ function track_mha(srcdir, srcpattern, lookahead, load_data, destmat)
 %             anticyc_19921014.mat)
 % lookahead:  Boolean value to run the scan with lookahead enabled [0 or 1]
 % load data:  Path to pre-generated data. Use 0 to load no data.
-% destmat:    Path to saved mat-file. (should end in .mat)
+% destmat:    Path to saved mat-file. (should NOT end in .mat)
     if isa(load_data, 'numeric')
         load_data = '0';
     end

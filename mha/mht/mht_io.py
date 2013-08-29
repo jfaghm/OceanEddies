@@ -4,46 +4,53 @@ import numpy as np
 import scipy.io
 from collections import deque
 from eddy import Eddy
+from math import ceil
 from node import Node
 
 def load_tracks(src):
 	"""Load saved data. Returns a dict with all of the saved values (excluding start_date)."""
-	mat = scipy.io.loadmat(src, struct_as_record=False)
-	tracks = mat['tracks']
+	mat = scipy.io.loadmat(src + '_f0', struct_as_record=False)
+	tracks_list = [mat['tracks']]
 	info = mat['mhaInfo'][0,0]
-	roots = [None]*tracks.shape[0]
+	f_count = mat['fileCount'][0,0]
+	for i in range(f_count)[1:]:
+		mat = scipy.io.loadmat(src + '_f' + str(i), struct_as_record=False)
+		tracks_list += [mat['tracks']]
+	roots = [None]*(tracks_list[0].shape[0]*(f_count-1)+tracks_list[-1].shape[0])
 	start_depth = info.EndDepth[0,0]
 	prune_depth = info.PruneDepth[0,0]
 	gate_dist = info.GateDist[0,0]
-	for i in range(tracks.shape[0]):
-		track = tracks[i,0]
-		scores = info.Scores[i,0]
-		missings = info.Missing[i,0].astype('bool')
-		frames = track.Eddies[0,0]
-		parent = None
-		for j in range(track.Length[0,0]):
-			eddy = Eddy(frames.Stats[j,0][0,0],
-				frames.Lat[j,0],
-				frames.Lon[j,0],
-				frames.Amplitude[j,0],
-				frames.ThreshFound[j,0],
-				frames.SurfaceArea[j,0],
-				frames.Date[j,0],
-				frames.Cyc[j,0],
-				frames.MeanGeoSpeed[j,0],
-				frames.DetectedBy[j,0][0])
-			node = Node(eddy)
-			node.final = True
-			node.base_depth = track.StartIndex[0,0]+j-1
-			node.score = scores[j,0]
-			node.missing = missings[j,0]
-			if parent is None:
-				roots[i] = node
-			else:
-				parent.set_child(node)
-			parent = node
-		parent.final = parent.base_depth < start_depth-1
-		parent.add_child(Node(consts.END))
+	for index in range(len(tracks_list)):
+		tracks = tracks_list[index]
+		for i in range(tracks.shape[0]):
+			track = tracks[i,0]
+			scores = info.Scores[tracks_list[0].shape[0]*index+i,0]
+			missings = info.Missing[tracks_list[0].shape[0]*index+i,0].astype('bool')
+			frames = track.Eddies[0,0]
+			parent = None
+			for j in range(track.Length[0,0]):
+				eddy = Eddy(frames.Stats[j,0][0,0],
+					frames.Lat[j,0],
+					frames.Lon[j,0],
+					frames.Amplitude[j,0],
+					frames.ThreshFound[j,0],
+					frames.SurfaceArea[j,0],
+					frames.Date[j,0],
+					frames.Cyc[j,0],
+					frames.MeanGeoSpeed[j,0],
+					frames.DetectedBy[j,0][0])
+				node = Node(eddy)
+				node.final = True
+				node.base_depth = track.StartIndex[0,0]+j-1
+				node.score = scores[j,0]
+				node.missing = missings[j,0]
+				if parent is None:
+					roots[tracks_list[0].shape[0]*index+i] = node
+				else:
+					parent.set_child(node)
+				parent = node
+			parent.final = parent.base_depth < start_depth-1
+			parent.add_child(Node(consts.END))
 	return {'roots': roots,
 		'start_depth': start_depth,
 		'prune_depth': prune_depth,
@@ -132,14 +139,24 @@ def write_tracks(roots, dest, timesteps, prune_depth = 2, gate_dist = 150):
 	info = np.array((len(timesteps)-prune_depth, prune_depth, gate_dist, s_tracks, m_tracks),
 		dtype=[('EndDepth', 'i4'), ('PruneDepth', 'i4'), ('GateDist', 'f8'),
 		('Scores', 'object'), ('Missing', 'object')])
-	scipy.io.savemat(dest,
-		{'tracks': e_tracks,
+	f_count = int(ceil(len(e_tracks)/200000.0))
+	scipy.io.savemat(dest + '_f0',
+		{'fileCount': f_count,
+		 'tracks': e_tracks[:200000],
 		 'startDate': np.array(int(timesteps[0]), dtype='f8'),
 		 'mhaInfo': info},
-		appendmat=False,
+		appendmat=True,
 		format='5',
 		oned_as='column',
 		do_compression=False)
+	for i in range(f_count-1):
+		i += 1
+		scipy.io.savemat(dest + '_f' + str(i),
+			{'tracks': e_tracks[200000*i:200000*(i+1)]},
+			appendmat=True,
+			format='5',
+			oned_as='column',
+			do_compression=False)
 
 def fmt_print_with_no_root(e_instances, child_score):
 	"""Prints out eddies that don't have an instance that starts a new track"""
