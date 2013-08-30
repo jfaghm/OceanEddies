@@ -15,6 +15,9 @@ function scan_multi( ssh, lat, lon, dates, cyc, scan_type, destdir )
         mkdir(destdir);
     end
     parfor i = 1:length(dates)
+        if exist([destdir cyc '_' num2str(dates(i)) '.mat'], 'file')
+            continue;
+        end
         fprintf('starting iteration %d\n', i);
         eddies = scan_single(ssh(:,:,i), lat, lon, dates(i), cyc, scan_type);
         save_data([destdir cyc '_' num2str(dates(i))], eddies);
