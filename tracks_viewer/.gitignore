@@ -1,0 +1,12 @@
+# data directory
+SSH
+track_data
+pixels_data
+chelton_data
+attributes
+
+# text files
+*.txt
+
+# temp file
+*~

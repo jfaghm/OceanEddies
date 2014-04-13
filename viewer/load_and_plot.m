@@ -1,6 +1,0 @@
-function load_and_plot( path )
-    data = load(path);
-    plot_tracks(data.tracks_cell, data.tracks_names, ...
-        data.daterefs_cell, data.contour_mask, data.ssh, data.lat, ...
-        data.lon, data.latlim, data.lonlim);
-end

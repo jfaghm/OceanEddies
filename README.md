@@ -60,19 +60,25 @@ mht.write_tracks(roots, 'cyclonic_tracks.mat', mht.list_dates(eddies_path, 'eddi
 ```
 
 ## Eddy track viewer
-This eddy viewer will display eddy tracks with the bodies borders layed on top of the ssh data.
-It allows moving back and forth, and requires you to subset the data for performance (the subset
-could consist of the entire world, but that would not give any performance boost).
+This eddy viewer will display eddy tracks from Eddyscan v2 together with SSH data background. It contains the following components (from left to right, top to bottom):
+- Current date textbox: a textbox that displays current date
+- Eddy type checkboxes: for choosing which type of eddies to display (cyclonic/anticyclonic). User can also choose to display both of them on the world map.
+- Track type dropdown box: for choosing different type of tracks to display, for now the script only sets up All or None.
+- Track filter by length: user can input minimum and maximum length (lifetime) of displayinig tracks, leave blank or 'any' if you want to see tracks with any length.
+- Background dropbox: a dropbox for choosing type of background to display on world map. For now the script only let the user choose either None or SSH background.
+- Show contours toggle button: Toggle this button for turning on/off the bodies borders of current eddies on world map.
+- Show Chelton tracks toggle button: Toggle this button for turning on/off Chelton tracks from http://cioss.coas.oregonstate.edu/eddies/data.html.
+- Select eddy button: pressing this button will let the user select a current eddy and view its information in the eddy info textbox.
+- Date list box: a list of dates in yyyymmdd format will be displayed for user to select so that only tracks that have one eddy detected at that selected date will be displayed on world map.
+- World map: display background and qualified tracks on the map. Current eddies will be filled with the corresponding color in the legend. Eddies in the past will be on green path, and eddies in the future will be on paths with different colors as the legend shows. Any change of the above components will update world map.
+- Forward/Backward button: move the time forward or backward and update world map.
+- Eddy info text box: display the information of the eddy selected after clicking select eddy button.
 
 ### Requirements
- + Matlab
+ + Matlab Mapping Toolbox
 
 ### Example Usage
 ```matlab
-% Must have loaded ssh data, expects ssh, lat, lon, dates
-% ssh should use NaNs for land
-
-mk_global_data; % Need to modify script according to your setup
-mk_all_subsets; % May need to modify. Which subsets are generated are in this file
-load_and_plot('subsets/swpacific');
+prepare_viewer_data; % Download and unzip viewer data, only need to run once
+start_track_viewer;
 ```
