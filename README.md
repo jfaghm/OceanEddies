@@ -11,7 +11,7 @@ SSH data.
 
 ### Usage
 There are two scripts which can be used to call eddyscan: [scan_single.m](eddyscan/scan_single.m)
-and [scan_ssh_subset.m](eddyscan/scan_ssh_subset.m). The second script is can be used to scan many
+and [scan_multi.m](eddyscan/scan_multi.m). The second script is can be used to scan many
 timesteps at once. Below is an example for using ``scan_single.m``:
 ```matlab
 % Find all anticyclonic eddies
