@@ -79,6 +79,5 @@ This eddy viewer will display eddy tracks from Eddyscan v2 together with SSH dat
 
 ### Example Usage
 ```matlab
-prepare_viewer_data; % Download and unzip viewer data, only need to run once
-start_track_viewer;
+start_track_viewer; % This script will start the viewer with sample data (12 first weeks). To download and unzip full data (about 3GB), use prepare_viewer_data 
 ```
