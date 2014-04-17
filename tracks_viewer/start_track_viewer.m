@@ -1,16 +1,16 @@
 %% Input variable
 ssh_save_dir = 'SSH/';
 pixel_save_dir = 'pixels_data/';
-track_tag_save_dir = 'track_data/';
+track_save_dir = 'track_data/';
 attribute_dir = 'attributes/'; 
 chelton_save_dir = 'chelton_data/';
 
 % Loading cyclonic and anticyclonic tracks in lnn format
 if ~exist('cyclonic_tracks', 'var')
     disp('loading tracks');
-    temp = load('track_data/cyclonic_tracks.mat');
+    temp = load([track_save_dir 'cyclonic_tracks.mat']);
     cyclonic_tracks = temp.cyclonic_tracks;
-    temp = load('track_data/anticyclonic_tracks.mat');
+    temp = load([track_save_dir 'anticyclonic_tracks.mat']);
     anticyclonic_tracks = temp.anticyclonic_tracks;
 end
 
@@ -27,9 +27,9 @@ if ~exist('track_data', 'var');
     track_data.cyc_tracks = cyclonic_tracks;
     track_data.ant_tracks = anticyclonic_tracks;
     tic
-    temp = load([track_tag_save_dir 'cyclonic_tags.mat']);
+    temp = load([track_save_dir 'cyclonic_tags.mat']);
     track_data.cyc_tags = temp.cyclonic_tags;
-    temp = load([track_tag_save_dir 'anticyclonic_tags.mat']);
+    temp = load([track_save_dir 'anticyclonic_tags.mat']);
     track_data.ant_tags = temp.anticyclonic_tags;
     toc
 end

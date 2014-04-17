@@ -1,9 +1,5 @@
 # data directory
-SSH
-track_data
-pixels_data
-chelton_data
-attributes
+full_data
 
 # text files
 *.txt
