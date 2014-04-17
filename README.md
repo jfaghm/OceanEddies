@@ -74,10 +74,12 @@ This eddy viewer will display eddy tracks from Eddyscan v2 together with SSH dat
 - Forward/Backward button: move the time forward or backward and update world map.
 - Eddy info text box: display the information of the eddy selected after clicking select eddy button.
 
+Currently, only a sample data set of the first 12 weeks (10/14/1992 to 12/30/1992) is uploaded on Github. Full viewer data (about 3GB) are available at http://gofc.cs.umn.edu/eddy_project/tracks_viewer_data.zip. Use prepare_viewer_data to download and unzip data.
+
 ### Requirements
  + Matlab Mapping Toolbox
 
 ### Example Usage
 ```matlab
-start_track_viewer; % This script will start the viewer with sample data (12 first weeks). To download and unzip full data (about 3GB), use prepare_viewer_data 
+start_track_viewer; % This script will start the viewer with sample data (first 12 weeks)
 ```
