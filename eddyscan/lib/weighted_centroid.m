@@ -23,5 +23,6 @@ function [lat, lon] = weighted_centroid(ssh, pixellist, pixelidxlist, cyc, R)
     end
     
     [lat, lon] = pix2latlon(R, xbar, ybar);
+
 end
 

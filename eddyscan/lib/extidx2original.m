@@ -1,13 +1,13 @@
-function [idx, row, col] = extidx2original(idx)
-    SIZ=[721 1440];
-    SIZ_EXT=SIZ + [0 400];
+function [idx, row, col] = extidx2original(idx, original_size, extended_size)
+%EXTIDX2ORIGINAL Convert from extended indexes to original indexes
+    [row, col] = ind2sub(extended_size,idx);
     
-    [row, col] = ind2sub(SIZ_EXT,idx);
-    offright = col > 1640;
-    offleft = col < 201;
+    offright = col > (extended_size(2) + original_size(2)) / 2;
+    offleft = col < (extended_size(2) - original_size(2)) / 2 + 1;
     notoff = ~(offleft | offright);
-    col(offright)=col(offright)-1640;
-    col(offleft)=col(offleft)+1240;
-    col(notoff)=col(notoff)-200;
-    idx = sub2ind(SIZ,row,col);
+    col(offright)=col(offright) - (extended_size(2) + original_size(2)) / 2;
+    col(offleft) = col(offleft) + original_size(2) - (extended_size(2) - original_size(2)) / 2;
+    col(notoff)=col(notoff) - (extended_size(2) - original_size(2)) / 2;
+    
+    idx = sub2ind(original_size,row,col);
 end

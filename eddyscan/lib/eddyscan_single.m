@@ -79,7 +79,7 @@ function [ eddies ] = eddyscan_single(ssh_data, lats, lons, areamap, cyc)
             STATS = rmfield(STATS, intensity);
             
             extPixelIdxList = STATS.PixelIdxList;
-            [STATS.PixelIdxList, r, c] = extidx2original(STATS.PixelIdxList);
+            [STATS.PixelIdxList, r, c] = extidx2original(STATS.PixelIdxList, size(ssh_data), size(ssh_extended));
             if ( (8<STATS.Area) && (STATS.Area<1000) )
                 blobpmtr = bwperim(blobbw);
                 meanpmtr = mean(ssh_extended_data(blobpmtr == 1));

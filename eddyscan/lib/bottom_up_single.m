@@ -1,4 +1,4 @@
-function [ eddies ] = bottom_up_single(ssh_data, lat, lon, areamap, cyc)
+function [ eddies ] = bottom_up_single(ssh_data, lat, lon, areamap, cyc, is_padding)
 %BOTTOM_UP_SINGLE Finds eddies using the Bottom Up method
 %   Will return an array of struct's that contain the eddy data.
 %   ssh_data: A 2D array of double's that contain the sea surface heights (latsxlons)
@@ -8,36 +8,53 @@ function [ eddies ] = bottom_up_single(ssh_data, lat, lon, areamap, cyc)
 %         that of ssh_data)
 %   cyc: Pass 1 to output anticyclonic eddies or -1 to output cyclonic eddies
 
-    R = georasterref('LatLim', [-90 90], 'LonLim', [0 360], 'RasterSize', ...
-    [721, 1440], 'ColumnsStartFrom', 'south', 'RowsStartFrom', 'west');
+    min_pixel_size = 9;
+    
+    geo_raster_lat_limit = [lat(1) lat(end)];
+    if lon(1) > lon(end)
+        geo_raster_lon_limit = [lon(1) (360 + lon(end))];
+    else
+        geo_raster_lon_limit = [lon(1) lon(end)];
+    end
+    
+    R = georasterref('LatLim', geo_raster_lat_limit, 'LonLim', geo_raster_lon_limit, 'RasterSize', ...
+    size(ssh_data), 'ColumnsStartFrom', 'south', 'RowsStartFrom', 'west');
     
     extrema = get_extrema(ssh_data, cyc);
-    origExtrema = extrema;
-    extrema = [zeros(size(extrema, 1), 200), extrema, zeros(size(extrema, 1), 200)];
+    
+    if is_padding
+        origExtrema = extrema;
+        extrema = [zeros(size(extrema, 1), 200), extrema, zeros(size(extrema, 1), 200)];
+        sshExtended = [ssh_data(:, end-199:end), ssh_data(:, :), ssh_data(:, 1:200)];
+        [extrema_lat_indexes, extrema_lon_indexes] = ind2sub(size(extrema), find(extrema == 1));
 
-    sshExtended = [ssh_data(:, end-199:end), ssh_data(:, :), ssh_data(:, 1:200)];
-
-    [x, y] = ind2sub(size(extrema), find(extrema == 1));
-
-    extrema(:, 1:200) = origExtrema(:, end-199:end);
-    extrema(:, end-199:end) = origExtrema(:, 1:200);
+        extrema(:, 1:200) = origExtrema(:, end-199:end);
+        extrema(:, end-199:end) = origExtrema(:, 1:200);
+    else
+        [extrema_lat_indexes, extrema_lon_indexes] = ind2sub(size(extrema), find(extrema == 1));
+        sshExtended = ssh_data;
+    end
+        
 
     eddies = new_eddy();
-    eddies(length(x)).Date = NaN;
-    parfor j = 1:length(x)
-        xx = x(j); yy = y(j);
-        [~,~,e] = thresholdBU(cyc, xx-5, xx+5, yy-5, yy+5, sshExtended, extrema, ...
-            xx, yy, sshExtended(xx, yy), zeros(size(sshExtended)), lat, lon, R, areamap);
+    eddies(length(extrema_lat_indexes)).Date = NaN;
+%     parfor i = 1:length(extrema_lat_indexes)
+    for i = 1:length(extrema_lat_indexes)
+        curr_lat_index = extrema_lat_indexes(i); curr_lon_index = extrema_lon_indexes(i);
+        e = thresholdBU(cyc, curr_lat_index-5, curr_lat_index+5, curr_lon_index-5, curr_lon_index+5, ...
+            sshExtended, extrema, curr_lat_index, curr_lon_index, sshExtended(curr_lat_index, curr_lon_index), ...
+            zeros(size(sshExtended)), lat, lon, R, areamap, min_pixel_size, is_padding);
         if ~isempty(e)
-            eddies(j) = e;
+            eddies(i) = e;
         end
     end
     mask = cellfun('isempty', {eddies.Lat});
     eddies = eddies(~mask);
 end
 
-function [pixelX, pixelY, eddy] = thresholdBU(cyc, left, right, top, bottom, ...
-        ssh, extrema, x, y, thresh, previous, lat, lon, R, areamap)
+function [eddy] = thresholdBU(cyc, block_bottom_index, block_top_index, block_left_index, ...
+        block_right_index, ssh, extrema, x, y, thresh, previous, lat, lon, R, areamap, min_pixel_size, is_padding)
+    
     switch cyc
         case 1
             intensity = 'MaxIntensity';
@@ -47,16 +64,25 @@ function [pixelX, pixelY, eddy] = thresholdBU(cyc, left, right, top, bottom, ...
             error('Invalid cyc');
     end
 
-    try
-        block = ssh(left:right, top:bottom);
-        extremaBlock = extrema(left:right, top:bottom);
-        edgeOfWorld = false;
-    catch
-        left = left+1; right = right-1; top = top+1; bottom = bottom-1;
-        block = ssh(left:right, top:bottom);
-        extremaBlock = extrema(left:right, top:bottom);
+    if block_bottom_index < 1 || block_top_index > size(ssh, 1) || ...
+            block_left_index < 1 || block_right_index > size(ssh, 2)
         edgeOfWorld = true;
+        
+        block_bottom_index = max([block_bottom_index 1]); 
+        block_top_index = min([block_top_index size(ssh, 1)]); 
+        block_left_index = max([block_left_index 1]); 
+        block_right_index = min([block_right_index size(ssh, 2)]);
+        
+        block = ssh(block_bottom_index:block_top_index, block_left_index:block_right_index);
+        
+        extremaBlock = extrema(block_bottom_index:block_top_index, block_left_index:block_right_index);
+
+    else
+        edgeOfWorld = false;
+        block = ssh(block_bottom_index:block_top_index, block_left_index:block_right_index);
+        extremaBlock = extrema(block_bottom_index:block_top_index, block_left_index:block_right_index);
     end
+    
     step = .05;
     iter = 1;
     while true
@@ -65,7 +91,7 @@ function [pixelX, pixelY, eddy] = thresholdBU(cyc, left, right, top, bottom, ...
 
             perim = imdilate(logical(current), ones(3)) & ~logical(current);
             if all(isnan(block(perim)))
-                pixelX = []; pixelY = []; eddy = new_eddy();
+                eddy = new_eddy();
                 return;
             end
             disp('potential infinite loop')
@@ -74,31 +100,30 @@ function [pixelX, pixelY, eddy] = thresholdBU(cyc, left, right, top, bottom, ...
         bw = cyc .* block >= cyc .* thresh;
         labels = bwlabel(bw);
 
-        current = labels == labels(x - left + 1, y - top + 1);
+        current = labels == labels(x - block_bottom_index + 1, y - block_left_index + 1);
         currentExtrema = extremaBlock(current);
 
         if sum(currentExtrema) > 1 || edgeOfWorld            
-            %if more than half of your perimeter is land, then throw it out.
-            if size(block, 1) ~= size(previous(left:right, top:bottom), 1)
+
+            if size(block, 1) ~= size(previous(block_bottom_index:block_top_index, block_left_index:block_right_index), 1)
                 prevBlock = block(2:end-1, 2:end-1);
             else
                 prevBlock = block;
             end
 
-            perim = imdilate(logical(previous(left:right, top:bottom)), ones(3)) ...
-                & ~logical(previous(left:right, top:bottom));
+            perim = imdilate(logical(previous(block_bottom_index:block_top_index, block_left_index:block_right_index)), ones(3)) ...
+                & ~logical(previous(block_bottom_index:block_top_index, block_left_index:block_right_index));
             nan = isnan(prevBlock(perim));
             if sum(nan) / length(nan) > .3
-                pixelX = []; pixelY = []; eddy = new_eddy();
+                %if more than half of your perimeter is land, then throw it out.
+                eddy = new_eddy();
                 return;
             end
 
-            if sum(previous(:)) < 9
-                    pixelX = []; pixelY = []; eddy = new_eddy();
+            if sum(previous(:)) < min_pixel_size
+                    eddy = new_eddy();
                     return;
             end
-
-
 
             %plotBox(previous, ssh);
 
@@ -115,29 +140,39 @@ function [pixelX, pixelY, eddy] = thresholdBU(cyc, left, right, top, bottom, ...
             stats.Intensity = stats.(intensity);
             stats = rmfield(stats, intensity);
             
-            [idx, r, c] = extidx2original(stats.PixelIdxList);
-            stats.PixelIdxList = idx; stats.PixelList = [r, c];
-            geoSpeed = mean_geo_speed(ssh(:, 201:end-200), stats.PixelIdxList, lat, lon);
-            [elat, elon] = weighted_centroid(ssh(:, 201:end-200), stats.PixelList, stats.PixelIdxList, cyc, R);
+            if is_padding
+                [idx, r, c] = extidx2original(stats.PixelIdxList, [length(lat) length(lon)], size(ssh));
+                stats.PixelIdxList = idx; 
+            else
+                [r, c] = ind2sub(size(ssh), stats.PixelIdxList);
+            end
+            stats.PixelList = [r, c];
+            
+            if is_padding
+                geoSpeed = mean_geo_speed(ssh(:, 201:end-200), stats.PixelIdxList, lat, lon);
+                [elat, elon] = weighted_centroid(ssh(:, 201:end-200), stats.PixelList, stats.PixelIdxList, cyc, R);
+            else
+                geoSpeed = mean_geo_speed(ssh, stats.PixelIdxList, lat, lon);
+                [elat, elon] = weighted_centroid(ssh, stats.PixelList, stats.PixelIdxList, cyc, R);
+            end
+            
             % weighted_centroid returns lon from 0-360, fix this
             elon = (elon > 180).*(elon - 360) + (elon <= 180).*elon;
             sarea = get_image_area(stats.PixelList(:,1));
             eddy = new_eddy(rmfield(stats, 'PixelList'), amp, elat, elon, thresh, sarea, cyc, geoSpeed, 'ESv2');
 
-            [pixelX, pixelY] = ind2sub(size(ssh), find(previous == 1));
             return
         end
 
-
-
-        if outterRing(labels, labels(x - left+1, y - top + 1))
+        if outterRing(labels, labels(x - block_bottom_index+1, y - block_left_index + 1))
             %disp('expanding size');
-            [pixelX, pixelY, eddy] = thresholdBU(cyc, left-1, right+1, top-1,...
-                bottom+1, ssh, extrema, x, y, thresh, previous, lat, lon, R, areamap);
+            eddy = thresholdBU(cyc, block_bottom_index-1, block_top_index+1, block_left_index-1,...
+                block_right_index+1, ssh, extrema, x, y, thresh, previous, lat, lon, R, areamap, min_pixel_size, ...
+                is_padding);
             return
         end
 
-        previous(left:right, top:bottom) = current;
+        previous(block_bottom_index:block_top_index, block_left_index:block_right_index) = current;
         thresh = thresh - cyc*step;
     end
 

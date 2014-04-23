@@ -1,4 +1,4 @@
-function [ eddies ] = scan_single( ssh, lat, lon, date, cyc, scan_type )
+function [ eddies ] = scan_single( ssh, lat, lon, date, cyc, scan_type, is_padding )
 %SCAN_SINGLE Wrapper function to do scanning
 % ssh: ssh slice with nans for land
 % cyc: 'anticyc' or 'cyclonic'
@@ -17,6 +17,7 @@ function [ eddies ] = scan_single( ssh, lat, lon, date, cyc, scan_type )
     ampath = mfilename('fullpath');
     sep = strfind(ampath, filesep());
     ampath = ampath(1:sep(end-1));
+    % TODO: dynamically create an areamap?
     areamap = load([ampath 'data/quadrangle_area_by_lat.mat']);
     areamap = areamap.areamap;
     
@@ -26,7 +27,7 @@ function [ eddies ] = scan_single( ssh, lat, lon, date, cyc, scan_type )
         case 1
             eddies = eddyscan_single(ssh, lat, lon, areamap, ctype);
         case 2
-            eddies = bottom_up_single(ssh, lat, lon, areamap, ctype);
+            eddies = bottom_up_single(ssh, lat, lon, areamap, ctype, is_padding);
         case 0
             scanners = {@eddyscan_single, @bottom_up_single};
             eddies_out = {[], []};
