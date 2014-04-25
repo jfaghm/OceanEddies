@@ -96,7 +96,7 @@ function [ eddies ] = eddyscan_single(ssh_data, lats, lons, areamap, cyc)
                     j_start = ceil(bb(1));
                     j_end = j_start+bb(3)-1;
                     convex_image(i_start:i_end,j_start:j_end) = STATS.ConvexImage(:,:);
-                    [dummy, convr, ~] = extidx2original(find(convex_image)); %#ok<ASGLU>
+                    [dummy, convr, ~] = extidx2original(find(convex_image), size(ssh_data), size(ssh_extended)); %#ok<ASGLU>
                     convex_area = get_image_area(convr);
 
 
