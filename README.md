@@ -12,7 +12,7 @@ SSH data.
 ### Usage
 There are two scripts which can be used to call eddyscan: [scan_single.m](eddyscan/scan_single.m)
 and [scan_multi.m](eddyscan/scan_multi.m). The second script is can be used to scan many
-timesteps at once. Below is an example for using ``scan_single.m``:
+timesteps at once. Below is an example for using ``scan_single.m`` (assuming current directory is eddyscan):
 ```matlab
 % Find all anticyclonic eddies
 ssh_slice = ncread('ssh_data.nc', 'Grid_0001');
@@ -21,7 +21,8 @@ ssh_slice(ssh_slice == landval) = NaN;
 lat = ncread('ssh_data.nc', 'NbLatitudes');
 lon = ncread('ssh_data.nc', 'NbLongitudes');
 lon(lon >= 180) = lon(lon >= 180)-360;
-eddies = scan_single(ssh_slice, lat, lon, 'anticyc', 'v2');
+load('../data/quadrangle_area_by_lat.mat'); % Load areamap to compute eddies' surface areas
+eddies = scan_single(ssh_slice, lat, lon, 'anticyc', 'v2', areamap);
 ```
 
 ## LNN
