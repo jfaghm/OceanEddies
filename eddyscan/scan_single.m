@@ -13,10 +13,10 @@ function [ eddies ] = scan_single( ssh, lat, lon, date, cyc, scan_type, areamap,
 %   that refer to area of each pixel for a specific lat in a regular grid (pixeld have same area for the same 
 %   latitude)
 % Optional parameters (only applicable for v2 eddyscan):
-%   'minimumArea': minimum number of pixels for an eddy, used for validating eddies
-%   'thresholdStep': the minimum step for thresholding, the unit is SSH's unit
+%   'minimumArea': minimum number of pixels for an eddy, used for validating eddies, default value is 9
+%   'thresholdStep': the minimum step for thresholding, the unit is SSH's unit, default value is 0.05
 %   'isPadding': whether or not to pad SSH data, should be true when scanning SSH data with the longitudes expanding the 
-%   whole world dmap. Set to false if only partial SSH data is used.
+%   whole world dmap. Set to false if only partial SSH data is used. Default value is true
 
     if ~any(isnan(ssh(:)))
         error('Invalid ssh data, must contain NaNs for land values');

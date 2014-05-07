@@ -22,18 +22,33 @@ function [lat, lon] = weighted_centroid_irregular_grid(ssh, pixellist, pixelidxl
         ybar = ybar + size(ssh,2);
     end
 
-    if round(xbar) == 0
-        xbar = 1;
-    elseif round(xbar) == length(lats) + 1
-        xbar = length(lats);
+    x_lower = floor(xbar);
+    x_upper = ceil(xbar);
+    if x_lower == 0
+        lat = lats(1);
+    elseif x_upper == length(lats) + 1
+        lat = lats(end);
+    else
+        lat_lower = lats(x_lower);
+        lat_upper = lats(x_upper);
+        lat = lat_lower + (lat_upper - lat_lower) * (xbar - x_lower) / (x_upper - x_lower);
     end
-    lat = lats(round(xbar));
     
-    if round(ybar) == 0
-        ybar = 1;
-    elseif round(ybar) == length(lons) + 1
-        ybar = length(lons);
+    y_lower = floor(ybar);
+    y_upper = ceil(ybar);
+    if y_lower == 0
+        lon = lons(1);
+    elseif y_upper == length(lons) + 1
+        lon = lons(end);
+    else
+        lon_lower = lons(y_lower);
+        lon_upper = lons(y_upper);
+        if lon_upper - lon_lower > 180
+            lon_upper = lon_upper - 360;
+        elseif lon_lower - lon_upper > 180
+            lon_lower = lon_lower - 360;
+        end
+        lon = lon_lower + (lon_upper - lon_lower) * (ybar - y_lower) / (y_upper - y_lower);
     end
-    lon = lons(round(ybar));
 
 end

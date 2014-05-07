@@ -6,7 +6,11 @@ current_data = background_data;
 if hdls.is_autoadjusting_background
     % The auto adjustment toggle button is on
     % Set min and max by current region
-
+    
+    % Make lon going from -180 to 180
+    lon(lon < -180) = lon(lon < -180) + 360;
+    lon(lon > 180) = lon(lon > 180) - 360;
+    
     % Get coordinates of zoomed region
     [lat_min, lon_min, lat_max, lon_max] = get_zoomed_coordinates_limits( hdls );
     
