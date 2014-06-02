@@ -1,0 +1,1 @@
+This function has different way of computing the boundaries for considering next eddies in tracks and also lets the user to specify the time frequency. The old track_lnn only checks nearest next eddies why this function gets all eddies inside a rectangle.
