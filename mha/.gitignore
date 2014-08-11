@@ -1,0 +1,4 @@
+*.pyc
+build/
+mht/mht_c.so
+mht/mht_c.c
