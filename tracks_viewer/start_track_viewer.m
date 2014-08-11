@@ -1,5 +1,5 @@
 %% Input variable
-ssh_save_dir = 'SSH/';
+ssh_save_dir = 'southern_ocean/';
 pixel_save_dir = 'pixels_data/';
 track_save_dir = 'track_data/';
 attribute_dir = 'attributes/'; 

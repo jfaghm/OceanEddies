@@ -14,7 +14,6 @@ function [lat, lon] = weighted_centroid_irregular_grid(ssh, pixellist, pixelidxl
     mask = ~isnan(ssh(pixelidxlist));
     intensities = ssh(pixelidxlist)+shift;
     intensities = intensities - min(intensities); % should start from 0
-    
     xbar = sum(x(mask) .* intensities(mask).^2) / sum(intensities(mask).^2);
     ybar = sum(y(mask) .* intensities(mask).^2) / sum(intensities(mask).^2);
     
@@ -32,8 +31,10 @@ function [lat, lon] = weighted_centroid_irregular_grid(ssh, pixellist, pixelidxl
         lat_lower = lats(x_lower);
         lat_upper = lats(x_upper);
         lat = lat_lower + (lat_upper - lat_lower) * (xbar - x_lower) / (x_upper - x_lower);
+        if isnan(lat)
+            lat = 90;
+        end
     end
-    
     y_lower = floor(ybar);
     y_upper = ceil(ybar);
     if y_lower == 0

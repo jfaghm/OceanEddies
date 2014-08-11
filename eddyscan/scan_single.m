@@ -17,7 +17,6 @@ function [ eddies ] = scan_single( ssh, lat, lon, date, cyc, scan_type, areamap,
 %   'thresholdStep': the minimum step for thresholding, the unit is SSH's unit, default value is 0.05
 %   'isPadding': whether or not to pad SSH data, should be true when scanning SSH data with the longitudes expanding the 
 %   whole world dmap. Set to false if only partial SSH data is used. Default value is true
-
     if ~any(isnan(ssh(:)))
         error('Invalid ssh data, must contain NaNs for land values');
     end
@@ -37,14 +36,13 @@ function [ eddies ] = scan_single( ssh, lat, lon, date, cyc, scan_type, areamap,
     ctype = get_ctype();
     
     oldpath = addpath('lib');
-    
     switch stype
         case 1
-            eddies = eddyscan_single(ssh, lat, lon, areamap, ctype);
+            eddies = top_down_single(ssh, lat, lon, areamap, ctype, varargin{:});
         case 2
             eddies = bottom_up_single(ssh, lat, lon, areamap, ctype, varargin{:});
         case 0
-            scanners = {@eddyscan_single, @bottom_up_single};
+            scanners = {@top_down_single, @bottom_up_single};
             eddies_out = {[], []};
             parfor i = 1:2
                 eddies_out{i} = scanners{i}(ssh, lat, lon, areamap, ctype, varargin{:});

@@ -41,17 +41,17 @@ function [ eddies ] = eddyscan_single(ssh_data, lats, lons, areamap, cyc)
     R = georasterref('LatLim', [-90 90], 'LonLim', [0 360], 'RasterSize', size(ssh_data), 'ColumnsStartFrom', 'south', 'RowsStartFrom', 'west');
 
     if cyc==1
-        thresh_range = 0:.005:1;
+        thresh_range = 0:.025:1;%0:0.005:1 is original
         intensity = 'MaxIntensity';
     %     cycid = 'Anticyclonic';
     elseif cyc==-1
-        thresh_range = 1:-.005:0;
+        thresh_range = 1:-.025:0;% 1:-0.005:0 is original
         intensity = 'MinIntensity';
     %     cycid = 'Cyclonic';
     end
 
     idx = 1;
-    eddies = new_eddy();
+    eddies = mod_new_eddy();
     %display(['============== Finding ' cycid ' Eddies for Date: ' num2str(date) ' ==============']);
 
     %% Main Algorithm
@@ -66,7 +66,8 @@ function [ eddies ] = eddyscan_single(ssh_data, lats, lons, areamap, cyc)
         CC = bwconncomp(bw);
         lmat = labelmatrix(CC);
         %display(['  ' num2str(CC.NumObjects) ' objects found.']);
-
+        disp(['Number of CC objects detected: ', num2str(CC.NumObjects)]);
+        disp(['Real thresh is: ', num2str(realthresh)]);
         for n=1:CC.NumObjects
             blobbw = (lmat==n);
 
@@ -80,12 +81,12 @@ function [ eddies ] = eddyscan_single(ssh_data, lats, lons, areamap, cyc)
             
             extPixelIdxList = STATS.PixelIdxList;
             [STATS.PixelIdxList, r, c] = extidx2original(STATS.PixelIdxList, size(ssh_data), size(ssh_extended));
-            if ( (8<STATS.Area) && (STATS.Area<1000) )
+            if ( (9<=STATS.Area) && (STATS.Area<1000) )
                 blobpmtr = bwperim(blobbw);
                 meanpmtr = mean(ssh_extended_data(blobpmtr == 1));
                 amplitude = cyc*(STATS.Intensity - meanpmtr);
 
-                if ( (amplitude>=1)  && (has_local_maxmin(STATS.PixelIdxList)) )
+                if amplitude >= 1 && has_local_maxmin(STATS.PixelIdxList) > 0
                     [centroid_lat, centroid_lon] = get_centroid(r,c);
                     surface_area = get_image_area(r);
                     convex_pass = false; %#ok<NASGU>
@@ -107,26 +108,29 @@ function [ eddies ] = eddyscan_single(ssh_data, lats, lons, areamap, cyc)
                         continue;
                     end
 
-                    if test_convexity(centroid_lat, convex_area)
-                        test = test+1;
-                        convex_pass = surface_area/convex_area>convexity_ratio_limit;
-                    else
-                        no_test = no_test+1;
-                        convex_pass = true;
-                    end
-
-                    if ~convex_pass
-                        continue;
-                    end
+%                     if test_convexity(centroid_lat, convex_area)
+%                         test = test+1;
+%                         convex_pass = surface_area/convex_area>convexity_ratio_limit;
+%                     else
+%                         no_test = no_test+1;
+%                         convex_pass = true;
+%                     end
+% 
+%                     if ~convex_pass
+%                         continue;
+%                     end
 
                     if STATS.Centroid(1) <= 1640 && STATS.Centroid(1) > 200
+                        %disp('Eddy found.');
                         %display(['    ' num2str(idx) ' eddies found.']);
                         geospeed = mean_geo_speed(ssh_data, ...
                             STATS.PixelIdxList, lats, lons);
-                        eddies(idx) = new_eddy(...
+                        extrema_count = has_local_maxmin(STATS.PixelIdxList);
+                        eddies(idx) = mod_new_eddy(...
                             rmfield(STATS, {'Centroid' 'BoundingBox'}), ...
                             amplitude, centroid_lat, centroid_lon, ...
-                            realthresh, surface_area, cyc, geospeed, 'ESv1');
+                            realthresh, surface_area, cyc, geospeed, ...
+                            extrema_count, 'ESv1');
                         idx = idx + 1;
                     else
                         %display('duplicate eddy found');
@@ -198,19 +202,17 @@ function [ eddies ] = eddyscan_single(ssh_data, lats, lons, areamap, cyc)
     end
     
     function [bool] = has_local_maxmin( pxidxs )
-        bool = false;
+        bool = 0;
         [px_i, px_j] = ind2sub(size(ssh_data), pxidxs);
         for ii = 1:length(pxidxs)
             corei = px_i(ii)-1:px_i(ii)+1;
             corej = mod(px_j(ii)-2:px_j(ii), size(ssh_data, 2))+1;
             if sum(sum(cyc.*ssh_data(pxidxs(ii)) > cyc.*ssh_data(corei, corej))) == 8
-                bool = true;
-                return;
+                bool = bool + 1;
+                %bool = true;
+                %return;
             end
         end
+        %disp([num2str(temp), ' local maxmins found in potential eddy']);
     end
 end
-    
-
-
-
