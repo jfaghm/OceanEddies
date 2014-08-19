@@ -147,9 +147,9 @@ function [eddy] = thresholdBU(cyc, block_bottom_index, block_top_index, block_le
             else
                 geoSpeed = mean_geo_speed(ssh, stats.PixelIdxList, lat, lon);
                 if ~isempty(R)
-                    [elat, elon] = weighted_centroid(ssh, stats.PixelList, stats.PixelIdxList, cyc, R);
+                    [elat, elon] = weighted_centroid(cyc_ssh, stats.PixelList, stats.PixelIdxList, R);
                 else
-                    [elat, elon] = weighted_centroid_irregular_grid(ssh, stats.PixelList, stats.PixelIdxList, cyc, lat, lon);
+                    [elat, elon] = weighted_centroid_irregular_grid(cyc_ssh, stats.PixelList, stats.PixelIdxList, lat, lon);
                 end
             end
             
