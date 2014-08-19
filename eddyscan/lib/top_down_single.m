@@ -14,11 +14,11 @@ function [ eddies ] = top_down_single(ssh_data, lat, lon, areamap, cyc, varargin
 %   Optional parameters:
 %
 %   'sshUnits': The units the SSH data is in. top_down_single is built to
-%   work natively on centimeter SSH data. Valid parameters are 'meters' and
-%   'centimeters'. If the paramater passed in is 'meters', the SSh data
-%   will be multiplied by 100. No changes will be made if the paramater
-%   passed in is 'centimeters'. The default value of 'ssh_units'
-%   is centimeters
+%               work natively on centimeter SSH data. Valid parameters are
+%               'meters' and 'centimeters'. If the paramater passed in is
+%               'meters', the SSH data will be multiplied by 100. No
+%               changes will be made if the paramater passed in is
+%               'centimeters'. The default value of 'sshUnits' is centimeters
 %   'threshStart': lower Bound of thresholding range, -100 cm when cyc == 1,
 %                   100 cm when cyc == -1 by default
 %   'threshEnd': upper Bound of thresholding range, 100 cm
@@ -89,10 +89,10 @@ if strcmp(SSH_Units, 'meters')
     ssh_data = ssh_data * 100;
 elseif strcmp(SSH_Units, 'centimeters')
     max_val = max(ssh_data(:));
-    min_val = max(ssh_data(:));
+    min_val = min(ssh_data(:));
     if max_val < 1 && min_val > -1
         ssh_data = ssh_data * 100;
-    elseif max_val < 100 && min_val > -100
+    elseif max_val < 150 && min_val > -150
         
     else
         error('Could not figure out what units the SSH data provided is in. Please specify it as an additional parameter: sshUnits');
@@ -183,42 +183,98 @@ areas(82:91) = 18;
 areas = pi()*areas.^2;
 
 eddies = new_eddy();
+% only create pool when there is no pool
+% parfor loop to iterate all CCs under current thresholding values
+current_pool = gcp('nocreate'); % if no poor, create one
+if(isempty(current_pool))
+    parpool;
+end
+cyc_ssh = ssh_data * cyc;
 %% Nested loop
 for i = 1:length(realThresh)
     % set up
+    if cyc==1
+        intensity = 'MaxIntensity';
+    elseif cyc==-1
+        intensity = 'MinIntensity';
+    end
     currentThresh = realThresh(i);
     threshRange = (currentThresh + 100) / 200;
     bw = im2bw(ssh_extended, threshRange);
     if cyc==-1
         bw = imcomplement(bw);
     end
-    bw = bw.*bwMask;
-    CC = bwconncomp(bw);
-    lmat = labelmatrix(CC);
-    bw_mask_changes = cell(1, CC.NumObjects); % used tp store every bw mask returned from inner loop and combine them together to to used by next outer loop
-    
-    % only create pool when there is no pool
-    %current_poor = gcp('nocreate'); % if no poor, create one
-    %if(isempty(current_poor))
-    %    parpool;
+    bw = bw&bwMask;
+    %if bw == 0
+    %    break;
     %end
-    %disp(['Scanning at threshold ', num2str(currentThresh), ' with ', num2str(CC.NumObjects), ' objects']);
-    % parfor loop to iterate all CCs under current thresholding values
-    parfor n=1:CC.NumObjects
-        [eddy, bw_mask_changes{n}] = thresholdTD(cyc, ssh_data, ssh_extended,ssh_extended_data, currentThresh, lat, lon, R, areamap, minimumArea, ...
-            maximumArea, convexRatioLimit, minAmplitude, minExtrema, bwMask, areas, lmat, n);
-        if(~isempty(eddy))
-            eddies = horzcat(eddies, eddy);
+    CC = bwconncomp(bw);
+    new_CC = struct('Connectivity', CC.Connectivity, 'ImageSize', CC.ImageSize, 'NumObjects', 0, 'PixelIdxList', cell(1));
+    CC_Areas = zeros(1, length(CC.PixelIdxList));
+    x = 1;
+    for j = 1:CC.NumObjects
+        CC_Areas(j) = length(CC.PixelIdxList{j});
+        if CC_Areas(j) > minimumArea && CC_Areas(j) < maximumArea
+            new_CC.NumObjects = new_CC.NumObjects + 1;
+            new_CC.PixelIdxList{x} = CC.PixelIdxList{j};
+            x = x + 1;
         end
     end
-    
-    % integate all single bw_masks togetger eith old one
-    updated_bw_mask = bwMask;
-    for j = 1:length(bw_mask_changes)
-        updated_bw_mask = updated_bw_mask.*bw_mask_changes{j};
+    if new_CC.NumObjects == 0
+        continue;
     end
+    lmat = labelmatrix(new_CC);
+    perim = bwperim(lmat);
+    switch class(lmat)
+        case 'uint8'
+            perim = uint8(perim);
+        case 'uint16'
+            perim = uint16(perim);
+        case 'uint32'
+            perim = uint32(perim);
+        case 'uint64'
+            perim = uint64(perim);
+    end
+    perim = perim.*lmat;
     
-    bwMask = updated_bw_mask;
+    STATS = regionprops(lmat, ssh_extended_data, 'Extrema',...
+        'PixelIdxList', intensity, 'ConvexImage', 'BoundingBox', ...
+        'Centroid', 'Solidity', 'Extent', 'Orientation', ...
+        'MajorAxisLength', 'MinorAxisLength');
+    [STATS(:).Intensity] = STATS.(intensity);
+    STATS = rmfield(STATS, intensity);
+    
+    disp(['Scanning at threshold ', num2str(currentThresh), ' with ', num2str(new_CC.NumObjects), ' objects']);
+    parfor_flag = 0;
+    if new_CC.NumObjects < 100
+        for n=1:new_CC.NumObjects
+            
+            [eddy, bwMask] = thresholdTD(cyc, ssh_data, ssh_extended,ssh_extended_data, currentThresh, lat, lon, R, areamap, ...
+                convexRatioLimit, minAmplitude, minExtrema, bwMask, areas, STATS(n), perim, n, cyc_ssh);
+            if(~isempty(eddy))
+                eddies = horzcat(eddies, eddy);%#ok
+            end
+        end
+    else
+        parfor_flag = 1;
+        parfor n=1:new_CC.NumObjects
+            [eddy, bw_mask_changes{n}] = thresholdTD(cyc, ssh_data, ssh_extended,ssh_extended_data, currentThresh, lat, lon, R, areamap, ...
+                convexRatioLimit, minAmplitude, minExtrema, bwMask, areas, STATS(n), perim, n, cyc_ssh);
+            if(~isempty(eddy))
+                eddies = horzcat(eddies, eddy);
+            end
+        end
+    end
+    % integate all single bw_masks togetger eith old one
+    if parfor_flag
+        updated_bw_mask = bwMask;
+        for j = 1:length(bw_mask_changes)
+            if ~isempty(bw_mask_changes{j})
+                updated_bw_mask = updated_bw_mask & bw_mask_changes{j};
+            end
+        end
+        bwMask = updated_bw_mask;
+    end
 end
 
 mask = cellfun('isempty', {eddies.Lat});

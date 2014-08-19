@@ -1,14 +1,10 @@
 function [ eddy, newBWMask] = thresholdTD( cyc, ssh_data, ssh_extended,ssh_extended_data, currentThresh,...
-    lat, lon, R, areamap, minimumArea, maximumArea, convexRatioLimit, minAmplitude, minExtrema, bwMask, areas, lmat, index)
+    lat, lon, R, areamap, convexRatioLimit, minAmplitude, minExtrema, bwMask, areas,...
+    STATS, perim, index, cyc_ssh)
 % return a single eddy at one sepcific thresholding value and under one
 % of CC object
 % 'currentThresh' : current thresholding value used to scan this eddy
 % all the other parameters are the same in top_down_single.m
-if cyc==1
-    intensity = 'MaxIntensity';
-elseif cyc==-1
-    intensity = 'MinIntensity';
-end
 
 %return empty if not eddy
 eddy = [];
@@ -16,75 +12,61 @@ eddy = [];
 newBWMask = bwMask;
 %%
 
-blobbw = (lmat==index);
-
-STATS = regionprops(blobbw, ssh_extended_data, 'Area', 'Extrema',...
-    'PixelIdxList', intensity, 'ConvexImage', 'BoundingBox', ...
-    'Centroid', 'Solidity', 'Extent', 'Orientation', ...
-    'MajorAxisLength', 'MinorAxisLength');
-
-STATS.Intensity = STATS.(intensity);
-STATS = rmfield(STATS, intensity);
-
 extPixelIdxList = STATS.PixelIdxList;
 [STATS.PixelIdxList, r, c] = extidx2original(STATS.PixelIdxList, size(ssh_data), size(ssh_extended));
 STATS.PixelList = [r, c];
-if ( (minimumArea <= STATS.Area) && (STATS.Area <= maximumArea) )
-    blobpmtr = bwperim(blobbw);
-    meanpmtr = mean(ssh_extended_data(blobpmtr == 1));
-    amplitude = cyc*(STATS.Intensity - meanpmtr);
-    
-    if ( (amplitude >= minAmplitude)  && (getNumberOfLocalExtrema(STATS.PixelIdxList) >= minExtrema) )
-        if ~isempty(R)
-        	[centroid_lat, centroid_lon] = get_centroid(r,c);
-        else
-        	[centroid_lat, centroid_lon] = weighted_centroid_irregular_grid(ssh_data, STATS.PixelList, STATS.PixelIdxList, cyc, lat, lon);
-        end
-        surface_area = get_image_area(r);
-        convex_pass = false;  %#ok<NASGU>
-        bb = STATS.BoundingBox;
-        convex_image = zeros(size(blobbw));
-        i_start = ceil(bb(2));
-        i_end = i_start+bb(4)-1;
-        j_start = ceil(bb(1));
-        j_end = j_start+bb(3)-1;
-        convex_image(i_start:i_end,j_start:j_end) = STATS.ConvexImage(:,:);
-        [dummy, convr, ~] = extidx2original(find(convex_image), size(ssh_data), size(ssh_extended)); %#ok<ASGLU>
-        convex_area = get_image_area(convr);
-        
-        
-        maxdist = get_max_dist(STATS.Extrema);
-        maxdist_lim = get_maxdist_limit(centroid_lat);
-        
-        if maxdist >= maxdist_lim
-            return
-        end
-        
-        if test_convexity(centroid_lat, convex_area)
-            convexity_ratio = surface_area/convex_area;  
-            convex_pass = convexity_ratio > convexRatioLimit;
-        else
-            convex_pass = true;
-        end
-        
-        if ~convex_pass
-            return
-        end
-        
-        if STATS.Centroid(1) <= 1640 && STATS.Centroid(1) > 200
-            %display(['    ' num2str(idx) ' eddies found.']);
-            geospeed = mean_geo_speed(ssh_data, ...
-                STATS.PixelIdxList, lat, lon);
-            eddy = new_eddy(...
-                rmfield(STATS, {'Centroid' 'BoundingBox'}), ...
-                amplitude, centroid_lat, centroid_lon, ...
-                currentThresh, surface_area, cyc, geospeed,'ESv1');
-        else
-            %display('duplicate eddy found');
-        end
-        bwMask(extPixelIdxList) = 0;
-        newBWMask = bwMask;
+array = find(perim==index);
+meanpmtr = mean(ssh_extended_data(array));
+amplitude = cyc*(STATS.Intensity - meanpmtr);
+if ( (amplitude >= minAmplitude)  && (getNumberOfLocalExtrema(STATS.PixelIdxList) >= minExtrema) )
+    if ~isempty(R)
+        [centroid_lat, centroid_lon] = get_centroid(r,c);
+    else
+        [centroid_lat, centroid_lon] = weighted_centroid_irregular_grid(cyc_ssh, STATS.PixelList, STATS.PixelIdxList, lat, lon);
     end
+    surface_area = get_image_area(r);
+    convex_pass = false;  %#ok<NASGU>
+    bb = STATS.BoundingBox;
+    convex_image = zeros(size(ssh_extended_data));
+    i_start = ceil(bb(2));
+    i_end = i_start+bb(4)-1;
+    j_start = ceil(bb(1));
+    j_end = j_start+bb(3)-1;
+    convex_image(i_start:i_end,j_start:j_end) = STATS.ConvexImage(:,:);
+    [dummy, convr, ~] = extidx2original(find(convex_image), size(ssh_data), size(ssh_extended)); %#ok<ASGLU>
+    convex_area = get_image_area(convr);
+    
+    
+    maxdist = get_max_dist(STATS.Extrema);
+    maxdist_lim = get_maxdist_limit(centroid_lat);
+    if maxdist >= maxdist_lim
+        return
+    end
+    
+    if test_convexity(centroid_lat, convex_area)
+        convexity_ratio = surface_area/convex_area;  
+        convex_pass = convexity_ratio > convexRatioLimit;
+    else
+        convex_pass = true;
+    end
+    
+    if ~convex_pass
+        return
+    end
+    
+    if STATS.Centroid(1) <= 1640 && STATS.Centroid(1) > 200
+        %display(['    ' num2str(idx) ' eddies found.']);
+        geospeed = mean_geo_speed(ssh_data, ...
+            STATS.PixelIdxList, lat, lon);
+        eddy = new_eddy(...
+            rmfield(STATS, {'Centroid' 'BoundingBox'}), ...
+            amplitude, centroid_lat, centroid_lon, ...
+            currentThresh, surface_area, cyc, geospeed,'ESv1');
+    else
+        %display('duplicate eddy found');
+    end
+    bwMask(extPixelIdxList) = 0;
+    newBWMask = bwMask;
 end
 
 %% Helper Functions
@@ -123,8 +105,9 @@ end
         end
         dists = zeros(1,28);
         for x=1:size(dists,2)
-            dists(x) = deg2km(distance(latlons(x,1), latlons(x,2), ...
-                latlons(x,3), latlons(x,4)));
+            val = distance(latlons(x,1), latlons(x,2), ...
+                latlons(x,3), latlons(x,4));
+            dists(x) = val * 111.1945;
         end
         maxdist = max(dists);
     end

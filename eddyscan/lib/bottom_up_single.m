@@ -15,10 +15,14 @@ function [ eddies ] = bottom_up_single(ssh_data, lat, lon, areamap, cyc, varargi
 %   'thresholdStep': the minimum step for thresholding, the unit is SSH's unit
 %   'isPadding': whether or not to pad SSH data, should be true when scanning SSH data of the whole map. Set to false if
 %   only partial SSH data is used.
-
+%   'sshUnits': The units the SSH data is in. bottom_up_single is built to work natively on centimeter SSH data.
+%   Valid parameters are 'meters' and 'centimeters'. If the paramater passed in is 'meters', the SSH data will
+%   be multiplied by 100. No changes will be made if the paramater passed in is 'centimeters'.
+%   The default value of 'sshUnits' is centimeters.
     p = inputParser;
     defaultMinPixelSize = 9;
     defaultThresholdStep = 0.05;
+    defaultSSHUnits = 'centimeters';
     defaultPaddingFlag = true;
     addRequired(p, 'ssh_data');
     addRequired(p, 'lat');
@@ -28,10 +32,26 @@ function [ eddies ] = bottom_up_single(ssh_data, lat, lon, areamap, cyc, varargi
     addParameter(p, 'minimumArea', defaultMinPixelSize, @isnumeric);
     addParameter(p, 'thresholdStep', defaultThresholdStep, @isnumeric);
     addParameter(p, 'isPadding', defaultPaddingFlag);
+    addParameter(p, 'sshUnits', defaultSSHUnits);
     parse(p, ssh_data, lat, lon, areamap, cyc, varargin{:});
     minimumArea = p.Results.minimumArea;
     thresholdStep = p.Results.thresholdStep;
     isPadding = p.Results.isPadding;
+    SSH_Units = p.Results.sshUnits;
+    
+    if strcmp(SSH_Units, 'meters')
+        ssh_data = ssh_data * 100;
+    elseif strcmp(SSH_Units, 'centimeters')
+        max_val = max(ssh_data(:));
+        min_val = max(ssh_data(:));
+        if max_val < 1 && min_val > -1
+            ssh_data = ssh_data * 100;
+        elseif max_val < 100 && min_val > -100
+        
+        else
+            error('Could not figure out what units the SSH data provided is in. Please specify it as an additional parameter: sshUnits');
+        end
+    end
 
     %Check if the grid is regular (differences between lats and lons are equal)
     lat_diffs = lat(2:end) - lat(1:end-1);
@@ -75,12 +95,13 @@ function [ eddies ] = bottom_up_single(ssh_data, lat, lon, areamap, cyc, varargi
 
     eddies = new_eddy();
     eddies(length(extrema_lat_indexes)).Date = NaN;
+    cyc_sshExtended = sshExtended * cyc;
     parfor i = 1:length(extrema_lat_indexes)
         curr_lat_index = extrema_lat_indexes(i); curr_lon_index = extrema_lon_indexes(i);
         e = thresholdBU(cyc, curr_lat_index-5, curr_lat_index+5, curr_lon_index-5, curr_lon_index+5, ...
             sshExtended, extrema, curr_lat_index, curr_lon_index, sshExtended(curr_lat_index, curr_lon_index), ...
             thresholdStep, NaN, ...
-            zeros(size(sshExtended)), lat, lon, R, areamap, minimumArea, isPadding);
+            zeros(size(sshExtended)), lat, lon, R, areamap, minimumArea, isPadding, cyc_sshExtended);
         if ~isempty(e)
             eddies(i) = e;
         end

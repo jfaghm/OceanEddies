@@ -1,6 +1,6 @@
 function [eddy] = thresholdBU(cyc, block_bottom_index, block_top_index, block_left_index, block_right_index, ...
         ssh, extrema, extrema_lat_index, extrema_lon_index, thresh, threshold_step, last_step, previous, ...
-        lat, lon, R, areamap, min_pixel_size, is_padding)
+        lat, lon, R, areamap, min_pixel_size, is_padding, cyc_ssh)
 % THRESHOLDBU Get an eddy by bottom up method
 %   cyc: 1 for anticyclonic and -1 for cyclonic
 %   block_bottom(top/left/right)_index: index of the bottom/top/left/right of the block that will be used for
@@ -140,9 +140,9 @@ function [eddy] = thresholdBU(cyc, block_bottom_index, block_top_index, block_le
             if is_padding
                 geoSpeed = mean_geo_speed(ssh(:, 201:end-200), stats.PixelIdxList, lat, lon);
                 if ~isempty(R)
-                    [elat, elon] = weighted_centroid(ssh(:, 201:end-200), stats.PixelList, stats.PixelIdxList, cyc, R);
+                    [elat, elon] = weighted_centroid(cyc_ssh(:, 201:end-200), stats.PixelList, stats.PixelIdxList, R);
                 else
-                    [elat, elon] = weighted_centroid_irregular_grid(ssh(:, 201:end-200), stats.PixelList, stats.PixelIdxList, cyc, lat, lon);
+                    [elat, elon] = weighted_centroid_irregular_grid(cyc_ssh(:, 201:end-200), stats.PixelList, stats.PixelIdxList, lat, lon);
                 end
             else
                 geoSpeed = mean_geo_speed(ssh, stats.PixelIdxList, lat, lon);
@@ -179,7 +179,7 @@ function [eddy] = thresholdBU(cyc, block_bottom_index, block_top_index, block_le
             eddy = thresholdBU(cyc, block_bottom_index-1, block_top_index+1, block_left_index-1,...
                 block_right_index+1, ssh, extrema, extrema_lat_index, extrema_lon_index, thresh, threshold_step, ...
                 step, previous, lat, lon, R, areamap, min_pixel_size, ...
-                is_padding);
+                is_padding, cyc_ssh);
             return
         end
 
