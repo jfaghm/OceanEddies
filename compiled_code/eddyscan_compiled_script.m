@@ -15,8 +15,6 @@ if exist(eddy_dir, 'dir')
 end
 cd(['/home/kumarv/shared/ssh_data/', dir]);
 pwd;
-%eddy_dir = ['/home/kumarv/shared/eddies/', dir];
-%eddy_file = [eddy_dir, 'anticyc_', date, '.mat'];
 if exist(filename, 'file') && ~exist(eddy_file, 'file')
     %disp(['File ', filename, ' actually exists, yay']);
     ssh = ncread(filename, 'sla')';
@@ -24,12 +22,7 @@ if exist(filename, 'file') && ~exist(eddy_file, 'file')
     lon = double(ncread(filename, 'lon'));
     vars = load('/home/kumarv/shared/area_map.mat');
     area_map = vars.area_map;
-%     indices = regexp(filename, '[0-9]');
-%     nums = filename(indices);
-%     date = nums(1:8);
-    %disp(['Date = ', date]);
     cd('/home/kumarv/shared/eddyscan/');
-%     disp('It worked.');
     ant_eddies = scan_single(ssh, lat, lon, date, 'anticyc', 'v2', area_map, 'sshUnits', 'meters', 'minimumArea', 4);%#ok
     cyc_eddies = scan_single(ssh, lat, lon, date, 'cyclonic', 'v2', area_map, 'sshUnits', 'meters', 'minimumArea', 4);%#ok
     if ~exist(['/home/kumarv/shared/eddies/', dir], 'dir')
