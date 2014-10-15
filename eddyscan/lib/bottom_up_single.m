@@ -44,12 +44,13 @@ function [ eddies ] = bottom_up_single(ssh_data, lat, lon, areamap, cyc, varargi
     elseif strcmp(SSH_Units, 'centimeters')
         max_val = max(ssh_data(:));
         min_val = max(ssh_data(:));
-        if max_val < 1 && min_val > -1
+        if max_val < 1.5 && min_val > -1.5
             ssh_data = ssh_data * 100;
-        elseif max_val < 100 && min_val > -100
+        elseif max_val < 150 && min_val > -150
         
         else
-            error('Could not figure out what units the SSH data provided is in. Please specify it as an additional parameter: sshUnits');
+            disp('Could not figure out what units the SSH data provided is in. Running the scan assuming units of centimeters');
+            disp('To specify SSH unit data, include an additional parameter of sshUnits, followed by the unit type, E.G. meters');
         end
     end
 

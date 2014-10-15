@@ -90,12 +90,13 @@ if strcmp(SSH_Units, 'meters')
 elseif strcmp(SSH_Units, 'centimeters')
     max_val = max(ssh_data(:));
     min_val = min(ssh_data(:));
-    if max_val < 1 && min_val > -1
+    if max_val < 1.5 && min_val > -1.5
         ssh_data = ssh_data * 100;
     elseif max_val < 150 && min_val > -150
         
     else
-        error('Could not figure out what units the SSH data provided is in. Please specify it as an additional parameter: sshUnits');
+        disp('Could not figure out what units the SSH data provided is in. Running scan assuming units of centimers for the SSH data.');
+        disp('To specify SSH units, include an additional parameter of sshUnits, followed by the unit type, E.G. meters');
     end
 end
 
