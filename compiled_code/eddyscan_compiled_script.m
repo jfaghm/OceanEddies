@@ -16,7 +16,6 @@ end
 cd(['/home/kumarv/shared/ssh_data/', dir]);
 pwd;
 if exist(filename, 'file') && ~exist(eddy_file, 'file')
-    %disp(['File ', filename, ' actually exists, yay']);
     ssh = ncread(filename, 'sla')';
     lat = double(ncread(filename, 'lat'));
     lon = double(ncread(filename, 'lon'));
