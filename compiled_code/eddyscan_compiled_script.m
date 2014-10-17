@@ -1,7 +1,15 @@
-function eddyscan_compiled_script(file_path)%#codegen
-[dir, rem] = strtok(file_path, '/');
+function eddyscan_compiled_script(file_name, file_path, save_path)%#codegen
+if ~strcmp(file_path(end), '/')
+    file_path = strcat(file_path, '/');
+end
+if ~strcmp(save_path(end), '/')
+    save_path = strcat(save_path, '/');
+end
+vars = load('area_map.mat');
+area_map = vars.area_map;
+[dir, rem] = strtok(file_name, '/');
 filename = strtok(rem, '/');
-eddy_dir = ['/home/kumarv/shared/eddies/', dir];
+eddy_dir = [save_path, dir];
 indices = regexp(filename, '[0-9]');
 nums = filename(indices);
 date = nums(1:8);
@@ -10,24 +18,21 @@ if exist(eddy_dir, 'dir')
     cd(eddy_dir);
     if exist(eddy_file, 'file')
         disp('Eddy file detected, quitting.');
-        %quit;
+        quit;
     end
 end
-cd(['/home/kumarv/shared/ssh_data/', dir]);
-pwd;
-if exist(filename, 'file') && ~exist(eddy_file, 'file')
+cd([file_path, dir]);
+if exist([file_path, dir, '/', filename], 'file') && ~exist([save_path, dir, '/', eddy_file], 'file')
     ssh = ncread(filename, 'sla')';
     lat = double(ncread(filename, 'lat'));
     lon = double(ncread(filename, 'lon'));
-    vars = load('/home/kumarv/shared/area_map.mat');
-    area_map = vars.area_map;
-    cd('/home/kumarv/shared/eddyscan/');
+    cd(save_path);
     ant_eddies = scan_single(ssh, lat, lon, date, 'anticyc', 'v2', area_map, 'sshUnits', 'meters', 'minimumArea', 4);%#ok
     cyc_eddies = scan_single(ssh, lat, lon, date, 'cyclonic', 'v2', area_map, 'sshUnits', 'meters', 'minimumArea', 4);%#ok
-    if ~exist(['/home/kumarv/shared/eddies/', dir], 'dir')
-        mkdir(['/home/kumarv/shared/eddies/', dir]);
+    if ~exist([save_path, dir], 'dir')
+        mkdir([save_path, dir]);
     end
-    cd(['/home/kumarv/shared/eddies/', dir]);
+    cd([save_path, dir]);
     save(['anticyc_', date, '.mat'], 'ant_eddies');
     save(['cyclonic_', date, '.mat'], 'cyc_eddies');
 else
@@ -74,7 +79,7 @@ function [ eddies ] = scan_single( ssh, lat, lon, date, cyc, scan_type, areamap,
     ctype = get_ctype(cyc);
     disp('About to start scanning eddies');
     
-    oldpath = addpath('lib');
+    %oldpath = addpath('lib');
     switch stype
         case 1
             eddies = top_down_single(ssh, lat, lon, areamap, ctype, varargin{:});
@@ -90,7 +95,7 @@ function [ eddies ] = scan_single( ssh, lat, lon, date, cyc, scan_type, areamap,
     end
     [eddies.Date] = deal(date);
     
-    path(oldpath);
+    %path(oldpath);
    
 end
 %end
