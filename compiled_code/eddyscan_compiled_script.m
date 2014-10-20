@@ -1,4 +1,4 @@
-function eddyscan_compiled_script(file_name, file_path, save_path)%#codegen
+function eddyscan_compiled_script(file_name, file_path, save_path, varargin)%#codegen
 if ~strcmp(file_path(end), '/')
     file_path = strcat(file_path, '/');
 end
@@ -18,7 +18,7 @@ if exist(eddy_dir, 'dir')
     cd(eddy_dir);
     if exist(eddy_file, 'file')
         disp('Eddy file detected, quitting.');
-        quit;
+        %quit;
     end
 end
 cd([file_path, dir]);
@@ -27,8 +27,8 @@ if exist([file_path, dir, '/', filename], 'file') && ~exist([save_path, dir, '/'
     lat = double(ncread(filename, 'lat'));
     lon = double(ncread(filename, 'lon'));
     cd(save_path);
-    ant_eddies = scan_single(ssh, lat, lon, date, 'anticyc', 'v2', area_map, 'sshUnits', 'meters', 'minimumArea', 4);%#ok
-    cyc_eddies = scan_single(ssh, lat, lon, date, 'cyclonic', 'v2', area_map, 'sshUnits', 'meters', 'minimumArea', 4);%#ok
+    ant_eddies = scan_single(ssh, lat, lon, date, 'anticyc', 'v2', area_map, varargin{:});%#ok
+    cyc_eddies = scan_single(ssh, lat, lon, date, 'cyclonic', 'v2', area_map, varargin{:});%#ok
     if ~exist([save_path, dir], 'dir')
         mkdir([save_path, dir]);
     end
@@ -155,8 +155,8 @@ function [ eddies ] = bottom_up_single(ssh_data, lat, lon, areamap, cyc, varargi
     addRequired(p, 'lon');
     addRequired(p, 'areamap');
     addRequired(p, 'cyc');
-    addParameter(p, 'minimumArea', defaultMinPixelSize, @isnumeric);
-    addParameter(p, 'thresholdStep', defaultThresholdStep, @isnumeric);
+    addParameter(p, 'minimumArea', defaultMinPixelSize);%, @isnumeric);
+    addParameter(p, 'thresholdStep', defaultThresholdStep);%, @isnumeric);
     addParameter(p, 'isPadding', defaultPaddingFlag);
     addParameter(p, 'sshUnits', defaultSSHUnits);
     parse(p, ssh_data, lat, lon, areamap, cyc, varargin{:});
@@ -164,7 +164,17 @@ function [ eddies ] = bottom_up_single(ssh_data, lat, lon, areamap, cyc, varargi
     thresholdStep = p.Results.thresholdStep;
     isPadding = p.Results.isPadding;
     SSH_Units = p.Results.sshUnits;
-    
+    disp(minimumArea);
+    if isa(minimumArea, 'char')
+        disp('Minimum area was a string, converting to double.');
+        minimumArea = str2double(minimumArea);
+        disp(minimumArea);
+    end
+    if isa(thresholdStep, 'char')
+        disp('Threshold step was a string, converting to double.');
+        thresholdStep = str2double(thresholdStep);
+        disp(thresholdStep);
+    end
     if strcmp(SSH_Units, 'meters')
         ssh_data = ssh_data * 100;
     elseif strcmp(SSH_Units, 'centimeters')

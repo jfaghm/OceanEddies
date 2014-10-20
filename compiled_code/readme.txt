@@ -111,3 +111,89 @@ sub-directories in the SSH data main directory.
 Example: If SSH_Data/ has sub-directory 1993/ scanned, the results will be
 saved inside a sub-directory named 1993/ that will reside in the main
 directory specified by the arbitrary save path.
+
+Optional Arguments:
+Our eddyscan code allows the scan's parameters to be modified per run. This
+section will teach the user what each of the optional arguments is, how to
+set them in calling the comiled script, and their impact on the scan. The
+optional arguments that can be specified by the user are as follows:
+
+minimumArea (Minimum Area):
+Minimum area defaults to 9 pixels when unspecified.
+This argument sets the minimum area that an eddy can have to be classified as
+an eddy. The value specified for this parameter is an integer, and it is
+actually based on the number of pixels that the eddy consists of.
+E.G. An eddy is detected and takes up a total area of 25 pixels on the SSH
+grid. The minimum area is set to 9 pixels, so the eddy passes this check and
+continues on in the scan. Say another eddy with a total pixel count of 5 is
+detected. It would fail this check and not be considered an eddy.
+
+To specify this argument, after providing the required arguments (MCR
+directory, file name, file path, save path), pass "minimumArea" without
+quotes, followed by the value you want minimumArea to be set to.
+E.G.
+./run_eddyscan_compiled_script /arbitrary/path/here/MCR/v83/ 2004/dt_global_allsat_msla_20040101_20140106.nc /arbitrary/ssh_data/path/ /arbitrary/save/path/ minimumArea 4
+
+thresholdStep (Threshold Step):
+Threshold step defaults to 0.05 when unspecified.
+This argument will set the threshold step that the scan will change by between
+each scan of the SSH grid. An understanding of the original eddyscan
+algorithm (from Chelton et al.) is required to completely understand
+the impact of changing the thresholdStep, but a high level explanation is
+that as the threshold step gets larger, only the most prominent eddies are
+detected. Conversely, the smaller the threshold step gets, the more the smaller
+and less prominent eddies will begin to show up in scans alongside the most
+prominent eddies. These less prominent eddies can give good information about
+relatively calm spots on the ocean, but these smaller eddies are also more
+prone to significant impact from noise in the data, or other environmental
+noise. False eddies begin to show up more as the threshold step gets smaller
+as well. Small eddies are important, but they usually need more verification
+to be proven not to be false.
+
+To specify this argument, after providing the required arguments (MCR
+directory, file name, file path, save path), pass "minimumArea" without
+quotes, followed by the value you want minimumArea to be set to.
+E.G.
+./run_eddyscan_compiled_script /arbitrary/path/here/MCR/v83/ 2004/dt_global_allsat_msla_20040101_20140106.nc /arbitrary/ssh_data/path/ /arbitrary/save/path/ thresholdStep 0.05
+
+isPadding (Is Padding):
+Is padding defaults to true when unspecified.
+This argument specifies whether the eddyscan code will pad the right and left
+sides of the SSH grid so that eddies detected right on the edge of the grid
+will not be duplicated on both sides of the grid. There is almost never a
+reason to set this flag to false, but it can be done should the need arise.
+
+To specify this argument, after providing the required arguments (MCR
+directory, file name, file path, save path), pass "minimumArea" without
+quotes, followed by the value you want minimumArea to be set to.
+E.G.
+./run_eddyscan_compiled_script /arbitrary/path/here/MCR/v83/ 2004/dt_global_allsat_msla_20040101_20140106.nc /arbitrary/ssh_data/path/ /arbitrary/save/path/ isPadding true
+
+sshUnits (SSH units):
+SSH units defaults to centimeters when unspecified.
+This argument will modify the SSH grid by multiplying or dividing the entire
+matrix until the max value is near 100 and the min value is near -100. This
+is done for continuity among different formats of SSH data (old weekly data
+came in units of centimeters, not daily data comes in units of meters) so
+that there is no difference between scans of different units. This is done
+for the internal workings of our eddyscan. Eddy results will not be completely
+correct unless this parameter is specified properly, but the code also
+attempts to detect the units of the SSH Grid automatically, and will
+change its copy of the grid accordingly. Meter and centimeter are the only two
+untis that our lab has come across for SSH Data, so those are currently the
+only two supported.
+
+To specify this argument, after providing the required arguments (MCR
+directory, file name, file path, save path), pass "minimumArea" without
+quotes, followed by the value you want minimumArea to be set to.
+E.G.
+./run_eddyscan_compiled_script /arbitrary/path/here/MCR/v83/ 2004/dt_global_allsat_msla_20040101_20140106.nc /arbitrary/ssh_data/path/ /arbitrary/save/path/ sshUnits meters
+
+General Case of optional arguments:
+The general case for specifying these is very simple. After specifying all
+required arguments, simply type the name of the optional argument that
+you want to specify, and then type it's value afterward.
+E.G. argument_name argument_value
+
+A full run of optional arguments (Didn't bother specifying isPadding):
+./run_eddyscan_compiled_script /arbitrary/path/here/MCR/v83/ 2004/dt_global_allsat_msla_20040101_20140106.nc /arbitrary/ssh_data/path/ /arbitrary/save/path/ minimumArea 4 thresholdStep 0.05 sshUnits meters
