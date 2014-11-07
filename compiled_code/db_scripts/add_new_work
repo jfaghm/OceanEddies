@@ -1,0 +1,13 @@
+#!/bin/bash -l
+
+# Schema
+# Table: work
+# 0) index             INTEGER
+# 1) command_line      string
+# 2) status            string = {new, started, done, error}
+# 3) started           INTEGER TIMESTAMP
+# 4) completed         INTEGER TIMESTAMP
+# 5) output            string
+# 
+
+sqlite3 $mydb "insert into work values('$1', 'NEW', 0, 0, 'none');"

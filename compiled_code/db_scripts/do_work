@@ -1,0 +1,25 @@
+#!/bin/bash -l
+
+export idwork=`get_next`
+
+if [ "$idwork" != "" ]; then
+
+  get_lock
+  work=`sqlite3 worka.sql  "select command from work where rowid=$idwork limit 1;" -cmd ".timeout 1000"`
+  rel_lock
+
+  $work
+
+  get_lock
+  sqlite3 worka.sql  "update work set completed='`date +%s`' where rowid like $idwork" -cmd ".timeout 1000"
+  sqlite3 worka.sql  "update work set status='FINISHED' where rowid like $idwork" -cmd ".timeout 1000"
+  rel_lock
+
+  exit 0
+
+else
+
+  exit 1
+
+fi
+

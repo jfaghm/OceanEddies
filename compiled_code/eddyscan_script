@@ -1,0 +1,19 @@
+#!/bin/bash -l
+
+#=============================================================================
+# Get parameters, make run directory, and go into it  (MODIFY FOR YOUR USE)
+#
+# In this example
+#    two parameters are passed to this script (runone),
+#    shell variables a & b are set to the run parameter values
+#    a unique directory is created & used to run this case
+#
+MCR=$1
+file=$2
+INPUT=$3
+SAVEPATH=$4
+echo "Starting script"
+echo $file
+./run_eddyscan_compiled_script.sh $MCR $file $INPUT $SAVEPATH
+set_output "Executed"
+

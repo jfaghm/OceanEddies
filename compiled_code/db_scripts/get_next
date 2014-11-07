@@ -1,0 +1,15 @@
+#!/bin/bash -l
+
+get_lock
+
+id=`sqlite3 worka.sql  "select rowid from work where status='NEW' limit 1;" -cmd ".timeout 1000"`
+
+if [ "$id" != "" ]; then
+sqlite3 worka.sql  "update work set status='INPROGRESS' where rowid like $id" -cmd ".timeout 1000"
+
+sqlite3 worka.sql  "update work set started='`date +%s`' where rowid like $id" -cmd ".timeout 1000"
+fi
+
+rel_lock
+
+echo $id

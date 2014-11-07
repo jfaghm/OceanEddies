@@ -1,0 +1,6 @@
+# Set environment
+export dbwf_bin_dir=$(pwd)/db_scripts
+export PATH=$dbwf_bin_dir:$PATH
+export mydb=worka.sql
+export mylock=worka.lock
+

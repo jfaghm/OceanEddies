@@ -1,0 +1,3 @@
+export PATH=/home/tech/public/porter/db_workflow/bin:$PATH
+
+#:/home/tech/porter/src/sqlite/bin

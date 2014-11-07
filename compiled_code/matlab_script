@@ -1,0 +1,59 @@
+#!/bin/bash -l
+#=============================================================================
+# Set environment (do NOT modify)
+
+source set_env
+export myid=s
+
+
+#=============================================================================
+# Create a new (i.e., empty) work database  (no need to modify)
+
+init_work_db
+
+#=============================================================================
+# Add work items to the work database  (MODIFY FOR YOUR USE)
+#
+# To safely add work to the database while a run is in progress
+# you need to get and release locks (get_lock and rel_lockas)
+# as shown here.
+#
+file=$1
+echo $file
+INPUT=$1
+SAVEPATH=$2
+MCR=$3
+echo $INPUT
+echo $SAVEPATH
+balls_jihad="/home/kumarv/shared/eddies/"
+echo $balls_jihad
+if [ ! -d "$SAVEPATH" ]; then
+    mkdir "$SAVEPATH"
+fi
+ls $INPUT > dirs.tmp
+exec 3<> dirs.tmp
+get_lock
+while read -u 3 curr_dir
+do
+    ((counter1++))
+    echo "Directory $counter1"
+    echo $curr_dir
+    ls $INPUT/$curr_dir > files.tmp
+    exec 4<> files.tmp
+    while read -u 4 curr_file
+    do
+	((counter2++))
+	echo "$curr_dir/$curr_file"
+	add_new_work "./eddyscan_script $MCR $curr_dir/$curr_file $INPUT $SAVEPATH"
+    done
+    exec 4<&-
+    rm files.tmp
+done
+rel_lock
+exec 3<&-
+rm dirs.tmp
+
+#=============================================================================
+# List contents of work database  (optional)
+
+check_work_db

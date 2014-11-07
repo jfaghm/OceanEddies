@@ -1,0 +1,4 @@
+#!/bin/bash -l
+
+mv $mylock.$myid $mylock >& /dev/null
+

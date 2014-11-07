@@ -1,5 +1,6 @@
 README for eddyscan_compiled_script:
 
+
 Files that you may need to generate by yourself:
 Our eddyscan code requires a parameter that is called "area_map".
 This parameter is an area map of area values of a grid that represents the
@@ -26,6 +27,56 @@ based on whatever latitude and longitude sizes your SSH grid is in.
 Example:
 area_map = generate_area_map(720, 1440);
 Where 720 is the latitude size, and 1440 is the longitude size.
+
+
+
+Running This Code In Parallel:
+High Level Overview:
+The scripts created to run our compiled eddyscan code in parallel were
+originally created to run on the Minnesota Supercomputing Institute (MSI) 
+systems. MSI uses PBS as their job scheduler, so all scripts provided were
+developed to work for PBS. These scripts can still be used as examples for
+development of scripts for creating jobs under other job scheduling systems.
+
+The scripts used by this research lab have been provided as an example on how
+to run this compiled code in parallel. There are three main scripts:
+
+NOTE: These scripts call many other scripts that are more important to
+actually accomplishing job scheduling with PBS. These scripts were provided
+to us by MSI, and all except set_env can be found in the directory db_scripts/
+(set_env is found in the compiled_code/ directory)
+
+matlab_script: This script will set up the environment, set up a new database,
+and then add jobs to the database. The jobs will be in the format of running
+the eddyscan_script with the following parameters:
+1. The path to the SSH directory that hold all of the NetCDF SSH files that
+will be scanned. (See section Usage Notes on how to structure data inside
+directories)
+2. The path to the directory where you want eddy data to be saved.
+3. The path to the Matlab Compiler Runtime (MCR) (This path should be
+something similar to the following "/arbitrary/path/here/MCR/v83/", see
+section How to Run for in-depth information)
+Example run: ./matlab_script /your/absolute_path/here/ssh_data/
+/your/save_path/here/eddies/ /your/directory/here/MCR/v83/
+
+eddyscan_script: This script will be the one run when a job actually executes.
+All it does is do any required set up, and then it runs the script
+./run_eddyscan_compile_script.sh
+with all required parameters. Parameters have already been provided to this
+script by matlab_script, so as long as arguments to matlab_script were
+provided properly, human intervention should not be necessary.
+
+pbs_script: This script is another script provided to us by MSI so that we can
+schedule jobs under PBS. It's system specific in its syntax, but what it does
+is it asks for a certain number of nodes, processors per node, memory per
+processor, and walltime to execute for. When PBS allocates our job the
+resources it asks for, this script then makes an SSH call to send jobs off to
+remote nodes on MSI's HPC "Itasca" that we use. These remote nodes will
+execute the eddyscan_script call we provide, and the eddies that were detected
+in the execution of the eddyscan_compiled_script function will be saved to the
+specified ave directory.
+
+
 
 Usage Notes:
 To run the compiled version of the eddyscan code, MATLAB's MCR
@@ -68,6 +119,8 @@ when it goes to scan SSH data for eddies.
 
 Improperly structured SSH directories will fail to be scanned by the 
 unmodified eddyscan we provide.
+
+
 
 How to run:
 To run the compiled version of the eddyscan code, the file

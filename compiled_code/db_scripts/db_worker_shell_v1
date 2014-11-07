@@ -1,0 +1,22 @@
+#!/bin/bash -l
+
+# Set environment
+cd $PBS_O_WORKDIR
+source set_env
+export myid=$PBS_VNODENUM
+echo "starting worker: myid = $myid"
+
+
+# do_work wiill do one item of work & return
+# If there is no work left to do, do_wone returns error condition 1
+# while loop will keep running till all work items are done or taken
+
+idid=0
+while [ $idid == "0" ] ; do
+  do_work
+  idid=$?
+  if [ "$idid" == "1" ]; then
+     echo "No work left to do:  myid = $myid"
+  fi
+done
+

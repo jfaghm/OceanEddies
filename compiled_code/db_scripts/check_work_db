@@ -1,0 +1,10 @@
+#!/bin/bash -l
+
+# Set environment
+###source set_env
+export myid=c
+
+get_lock
+sqlite3 -column -header worka.sql  "select * from work limit 1000;"
+rel_lock
+
