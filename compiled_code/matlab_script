@@ -18,15 +18,11 @@ init_work_db
 # you need to get and release locks (get_lock and rel_lockas)
 # as shown here.
 #
-file=$1
-echo $file
 INPUT=$1
 SAVEPATH=$2
 MCR=$3
 echo $INPUT
 echo $SAVEPATH
-balls_jihad="/home/kumarv/shared/eddies/"
-echo $balls_jihad
 if [ ! -d "$SAVEPATH" ]; then
     mkdir "$SAVEPATH"
 fi
