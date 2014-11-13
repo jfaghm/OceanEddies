@@ -5,6 +5,9 @@ function plots = plot_eddy_by_type( view_handle, tracks, types, markers, colors,
 plots = NaN(size(types));
 
 for i = 1:length(types)
+    if types(i) ~= 0
+        is_filled = true;
+    end
     if ~isempty(tracks)
         eddies = tracks(tracks(:, 3) == types(i), 1:2);
     else

@@ -9,9 +9,11 @@ chelton_save_dir = 'chelton_data/';
 if ~exist('cyclonic_tracks', 'var')
     disp('loading tracks');
     temp = load([track_save_dir 'cyclonic_tracks.mat']);
-    cyclonic_tracks = temp.cyclonic_tracks;
+    names = fieldnames(temp);
+    cyclonic_tracks = temp.(names{1});
     temp = load([track_save_dir 'anticyclonic_tracks.mat']);
-    anticyclonic_tracks = temp.anticyclonic_tracks;
+    names = fieldnames(temp);
+    anticyclonic_tracks = temp.(names{1});
 end
 
 %% Setting up parameter to start the viewer
@@ -77,10 +79,14 @@ if ~exist('chelton_eddies', 'var');
 end
 
 % initialize eddy plot specification
-eddy_plotting_data.eddy_types = 0;
-eddy_plotting_data.eddy_markers{1} = 'S';
-eddy_plotting_data.eddy_colors{1} = [0.5 0 0.5];
-eddy_plotting_data.eddy_type_names{1} = 'Eddy';
+%eddy_plotting_data.eddy_types = 0;
+eddy_plotting_data.eddy_types = [0 -1 1];
+%eddy_plotting_data.eddy_markers{1} = 'S';
+%eddy_plotting_data.eddy_colors{1} = [0.5 0 0.5];
+eddy_plotting_data.eddy_markers = {'s', 's', 's'}; % using x for special eddies
+eddy_plotting_data.eddy_colors = {[0.5 0 0.5], 'g', 'm'}; % using green as color for special eddies
+%eddy_plotting_data.eddy_type_names{1} = 'Eddy';
+eddy_plotting_data.eddy_type_names = {'Eddy','Interpolated Eddy','Flagged Eddy'}; % just for the legend things
 
 %% Start viewer
 [hdls] = tracks_viewer(dates, track_data, background_data, pixel_save_dir, ...

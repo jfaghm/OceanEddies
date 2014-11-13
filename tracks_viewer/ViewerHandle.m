@@ -16,7 +16,7 @@ classdef ViewerHandle < handle
         
         eddyInfoText % the text box displaying eddy'info
         
-        track_data % including track [lat lon date_index eddy_index] and tags for each eddy in the track
+        track_data = [] % including track [lat lon date_index eddy_index] and tags for each eddy in the track
         pixel_dir % Pixel index directory of the eddies, will be use to plot eddy's contour
         
         % Track plotting flags
@@ -202,7 +202,7 @@ classdef ViewerHandle < handle
             
             hdls.cyc_current_eddy_plots = plot_eddy_by_type(hdls, [curr_lats(plotting_eddy_indexes)' ...
                 curr_lons(plotting_eddy_indexes)' curr_types(plotting_eddy_indexes)'], hdls.constants.eddy_types, ...
-                hdls.constants.eddy_markers, hdls.constants.eddy_colors, hdls.constants.CURRENT_EDDY_SIZE, true);
+                hdls.constants.eddy_markers, hdls.constants.eddy_colors, hdls.constants.CURRENT_EDDY_SIZE, false);
         end
         
         function plot_ant_tracks(hdls)
@@ -233,7 +233,7 @@ classdef ViewerHandle < handle
             
             hdls.ant_current_eddy_plots = plot_eddy_by_type(hdls, [curr_lats(plotting_eddy_indexes)' ...
                 curr_lons(plotting_eddy_indexes)' curr_types(plotting_eddy_indexes)'], hdls.constants.eddy_types, ...
-                hdls.constants.eddy_markers, hdls.constants.eddy_colors, hdls.constants.CURRENT_EDDY_SIZE, true);
+                hdls.constants.eddy_markers, hdls.constants.eddy_colors, hdls.constants.CURRENT_EDDY_SIZE, false);
         end
         
         function clear_tracks(hdls, eddy_type)
