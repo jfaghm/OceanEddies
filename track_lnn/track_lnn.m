@@ -1,4 +1,4 @@
-function [ tracks ] = track_lnn( eddies, time_frequency )
+function [ tracks ] = track_lnn( eddies_path, type, time_frequency )
 %TRACK_LNN Tracking eddies by lnn method
 %   For each eddy in a timestep, all eddies in next timestep within a boundary are checked to see if there's an eddy
 %   that qualifies some conditions to be stitched to current eddy. The north, south and east bounds are the gate
@@ -27,6 +27,11 @@ rangesearch_radius = 5; % euclidean radius in degree for rangesearch
 % duplicated with longitude lon+360 or lon-360 to make sure Euclidean distances can still get the eddies on the other
 % side of the map
 pad_range = 5; 
+
+eddies_names = get_eddies_names(eddies_path, type);
+eddy_length = length(eddies_names);
+eddies = cell(eddy_length, 1);
+eddies = load_eddies_cell(eddies, eddies_names);
 
 %% Begin tracking
 tracks = {};
@@ -111,6 +116,8 @@ for curr_time_step = 1:(length(eddies) - 1)
     end
     
     curr_track_indexes = next_eddies_track_indexes;
+    eddies{curr_time_step} = [];
+    eddies = load_eddies_cell(eddies, eddies_names);
 end
 
 end
@@ -243,4 +250,68 @@ next_surface_area = next_eddy.SurfaceArea;
 matched = curr_amplitude > 0.25 * next_amplitude && curr_amplitude < 2.75 * next_amplitude ...
     && curr_surface_area > 0.25 * next_surface_area && curr_surface_area < 2.75 * next_surface_area;
 
+end
+
+function [eddies_names] = get_eddies_names(path, type)
+% path is the path to the eddies directory
+% type is anticyclonic or cyclonic
+if ~strcmp(path(end), '/')
+    path = strcat(path, '/');
+end
+files = dir(path);
+x = 0;
+for i = 1:length(files)
+    if ~isempty(strfind(files(i).name, [type, '_']))
+        x = x + 1;
+    end
+end
+eddies_names = cell(x, 1);
+x = 1;
+for i = 1:length(files)
+    if files(i).isdir && ~isequal(files(i).name, '.') && ~isequal(files(i).name, '..')
+        rec_names = get_eddies_names([path, files(i).name, '/'], type);
+        for j = 1:length(rec_names)
+            eddies_names{x} = rec_names{j};
+            x = x + 1;
+        end
+        continue;
+    end
+    file = files(i).name;
+    [~, name, ext] = fileparts([path, file]);
+    if ~isempty(strfind(name, [type, '_'])) && strcmp(ext, '.mat')
+        eddies_names{x} = [path, file];
+        x = x + 1;
+    end
+end
+end
+
+function [modified_eddies_cell] = load_eddies_cell(eddies_cell, eddies_names)
+count_to_load = 10;
+names_length = length(eddies_names);
+x = 0;
+pos_1 = 1;
+for i = 1:length(eddies_cell)
+    if ~isempty(eddies_cell{i})
+        if x == 0
+            pos_1 = i;
+        end
+        x = x + 1;
+    end
+end
+iterations = count_to_load - x;
+first_empty_pos = pos_1 + x;
+last_empty_pos = first_empty_pos + iterations - 1;
+if last_empty_pos > names_length
+    last_empty_pos = names_length;
+end
+for i = first_empty_pos:last_empty_pos
+    eddy_name = eddies_names{i};
+    vars = load(eddy_name);
+    if strfind(eddy_name, 'anticyc')
+        eddies_cell{i} = vars.ant_eddies;
+    else
+        eddies_cell{i} = vars.cyc_eddies;
+    end
+end
+modified_eddies_cell = eddies_cell;
 end
