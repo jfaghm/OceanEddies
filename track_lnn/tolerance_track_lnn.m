@@ -472,19 +472,12 @@ end
 for i = first_empty_pos:last_empty_pos
     eddy_name = eddies_names{i};
     vars = load(eddy_name);
-    if strfind(eddy_name, 'anticyc')
-        eddies = vars.ant_eddies;
-        [f_eddies, real_indices, orig_count] = filter_eddies(eddies, minimumArea);
-        eddies_cell{i} = f_eddies;
-        real_indices_cell{i} = real_indices;
-        orig_count_array(i) = orig_count;
-    else
-        eddies = vars.cyc_eddies;
-        [f_eddies, real_indices, orig_count] = filter_eddies(eddies, minimumArea);
-        eddies_cell{i} = f_eddies;
-        real_indices_cell{i} = real_indices;
-        orig_count_array(i) = orig_count;
-    end
+    names = fieldnames(vars);
+    eddies = vars.(names{1});
+    [f_eddies, real_indices, orig_count] = filter_eddies(eddies, minimumArea);
+    eddies_cell{i} = f_eddies;
+    real_indices_cell{i} = real_indices;
+    orig_count_array(i) = orig_count;
 end
 modified_eddies_cell = eddies_cell;
 modified_indices_cell = real_indices_cell;

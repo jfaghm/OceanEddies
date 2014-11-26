@@ -307,11 +307,8 @@ end
 for i = first_empty_pos:last_empty_pos
     eddy_name = eddies_names{i};
     vars = load(eddy_name);
-    if strfind(eddy_name, 'anticyc')
-        eddies_cell{i} = vars.ant_eddies;
-    else
-        eddies_cell{i} = vars.cyc_eddies;
-    end
+    names = fieldnames(vars);
+    eddies_cell{i} = vars.(names{1});
 end
 modified_eddies_cell = eddies_cell;
 end
