@@ -13,9 +13,6 @@ if ~strcmp(tracks_save_dir(end), '/')
     tracks_save_dir = strcat(tracks_save_dir, '/');
 end
 eddies_names = get_eddies_names(eddies_path, type);
-for i = 1:length(eddies_names)
-    disp(eddies_names{i});
-end
 eddy_length = length(eddies_names);
 fake_eddy_count = ones(eddy_length, 1);
 orig_eddy_count = zeros(eddy_length, 1);
@@ -36,7 +33,7 @@ end
 
 %% now go through and add the flagged eddies to eddies_cells and alter eddy indices in tracks, and resave them
 
-disp('altering eddies and tracks')
+%disp('altering eddies and tracks')
 for i = 1:length(tracks)           
     iterations_since_needed = iterations_since_needed + 1;
     if size(tracks{i},2) == 5
@@ -60,19 +57,13 @@ for i = 1:length(tracks)
     end
     for k = 1:length(iterations_since_needed)
         if iterations_since_needed(k) > max_iterations && ~isempty(eddies{k})
-            disp(['Saving eddies on day ', num2str(k), ' back to file.']);
+            %disp(['Saving eddies on day ', num2str(k), ' back to file.']);
             path_cell = strsplit(eddies_names{k}, '/');
             file_name = path_cell{end};
             if ~exist(eddies_save_dir, 'dir')
                 mkdir(eddies_save_dir);
             end
-            if strcmp(type, 'anticyc')
-                ant_eddies = eddies{k};%#ok
-                save([eddies_save_dir, file_name], 'ant_eddies');
-            else
-                cyc_eddies = eddies{k};%#ok
-                save([eddies_save_dir, file_name], 'cyc_eddies');
-            end
+            personal_save([eddies_save_dir, file_name], eddies{k});
             fake_eddy_count(k) = 1;
             eddies{k} = [];
         end
@@ -81,36 +72,25 @@ end
 
 for i = 1:length(eddies)
     if ~isempty(eddies{i})
-        disp(['Saving eddies on day ', num2str(i), ' back to file.']);
+        %disp(['Saving eddies on day ', num2str(i), ' back to file.']);
         path_cell = strsplit(eddies_names{i}, '/');
         file_name = path_cell{end};
         if ~exist(eddies_save_dir, 'dir')
             mkdir(eddies_save_dir);
         end
-        if strcmp(type, 'anticyc')
-            ant_eddies = eddies{i};%#ok
-            save([eddies_save_dir, file_name], 'ant_eddies');
-        else
-            cyc_eddies = eddies{i};%#ok
-            save([eddies_save_dir, file_name], 'cyc_eddies');
-        end
+        personal_save([eddies_save_dir, file_name], eddies{i});
         eddies{i} = [];
     end
     if ~has_been_loaded(i)
-        disp(['Saving non-loaded eddies on day ', num2str(i), ' back to file.']);
+        %disp(['Saving non-loaded eddies on day ', num2str(i), ' back to file.']);
         vars = load(eddies_names{i});
+        s = fieldnames(vars);
         path_cell = strsplit(eddies_names{i}, '/');
         file_name = path_cell{end};
         if ~exist(eddies_save_dir, 'dir')
             mkdir(eddies_save_dir);
         end
-        if strcmp(type, 'anticyc')
-            ant_eddies = vars.ant_eddies;%#ok
-            save([eddies_save_dir, file_name], 'ant_eddies');
-        else
-            cyc_eddies = vars.cyc_eddies;%#ok
-            save([eddies_save_dir, file_name], 'cyc_eddies');
-        end
+        personal_save([eddies_save_dir, file_name], vars.(s{1}));
     end
 end
 
@@ -127,6 +107,10 @@ end
 
 end
 %% wrapper function to save eddies in parfor:
+
+function personal_save(eddies_path, eddies)%#ok
+save(eddies_path, 'eddies');
+end
 
 function [eddies_names] = get_eddies_names(path, type)
 % path is the path to the eddies directory
@@ -167,7 +151,7 @@ if index < 1 || index > length(eddies)
     error('Date index outside of eddy bounds.');
 end
 if isempty(eddies{index})
-    disp(['Loading eddies on day ', num2str(index)]);
+    %disp(['Loading eddies on day ', num2str(index)]);
     path_cell = strsplit(eddies_names{index}, '/');
     file_name = path_cell{end};
     if exist([eddies_save_dir, file_name], 'file')
