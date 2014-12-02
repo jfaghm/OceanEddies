@@ -12,18 +12,16 @@ function complete_run(ssh_path, eddies_save_path, tracks_save_path, fake_eddies,
 % 4. Format and process saved data so that it can be viewed in Hung's
 %    viewer that we include
 %
-% NOTE: The process of turning NetCDF file data into MATLAB data is
-% partially left up to the user to do. A function will be provided that
-% will accomplish this for the user, but the user will have to provide the
-% variable names for what the SSH data is called, what the Latitude data is
-% called, and what the Longitude data is called. Also, the user will either
-% have to have this function generate a dates array (that is, what day each
-% day of SSH data relates to) for it, or they will have to generate their
-% own. Code will be provided in the NetCDf to MATLAB data function to
-% assist with generating this dates array.
-% Also, this script will not open the viewer for the user, it will leave
-% that action up to the user. To open the viewer, all the user has to do is
-% run the start_track_viewer script inside the tracks_viewer directory.
+% NOTE: The process of turning NetCDF file data into MATLAB data is not
+% accomplished in this function.
+% The function set_up_ssh_data is provided that will accomplish this for
+% the user, but the user will have to provide the variable names that match
+% the function inputs. Refer to the comments at the top of the function
+% set_up_ssh_data for a description of what each of the required variables are.
+%
+% This script will not open the viewer for the user.
+% To open the viewer, run the start_track_viewer script inside the
+% tracks_viewer directory.
 
 p = inputParser;
 defaultLat = NaN;
@@ -143,7 +141,7 @@ if strcmp(fake_eddies, 'yes')
     cyclonic_tracks = vars.(s{1});
     eddies_save_path = modified_eddies_path;
 else
-    anticyclonic_tracks = track_lnn(eddies_save_path, 'anticyc', 1); % Change this so it can be an optional argument in input parser
+    anticyclonic_tracks = track_lnn(eddies_save_path, 'anticyc', 1); % Possibly change this so it can be an optional argument in input parser
     cyclonic_tracks = track_lnn(eddies_save_path, 'cyclonic', 1); % Same as above
 end
 save([tracks_save_path, 'anticyclonic_tracks.mat'], 'anticyclonic_tracks');
