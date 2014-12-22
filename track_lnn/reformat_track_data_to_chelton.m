@@ -59,7 +59,7 @@ for n=1:length(dates)
     eddies_t.area(st:ant_eddy_counts(n)+st-1)=ant_surface_areas{n};
     eddies_t.Ls(st:ant_eddy_counts(n)+st-1)=sqrt(ant_surface_areas{n}./pi);
     eddies_t.cyc(st:ant_eddy_counts(n)+st-1)=1;
-    %eddies_t.track_day(st:ant_eddy_counts(n)+st-1)=ac.jd{n};
+    eddies_t.track_day(st:ant_eddy_counts(n)+st-1)=deal(dates(n));
     eddies_t.id(st:ant_eddy_counts(n)+st-1)=ant_eddy_track_indexes{n};
 
     st=st+ant_eddy_counts(n);
@@ -71,7 +71,7 @@ for n=1:length(dates)
     eddies_t.area(st:cyc_eddy_counts(n)+st-1)=cyc_surface_areas{n};
     eddies_t.Ls(st:cyc_eddy_counts(n)+st-1)=sqrt(cyc_surface_areas{n}./pi);
     eddies_t.cyc(st:cyc_eddy_counts(n)+st-1)=-1;
-    %eddies_t.track_day(st:cyc_eddy_counts(n)+st-1)=cc.jd{n};
+    eddies_t.track_day(st:cyc_eddy_counts(n)+st-1)=deal(dates(n));
     eddies_t.id(st:cyc_eddy_counts(n)+st-1)=max_acid+cyc_eddy_track_indexes{n};
 
     st=st+cyc_eddy_counts(n);
