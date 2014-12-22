@@ -108,7 +108,7 @@ if ~isempty(anticyclonic_tracks)
 
     ant_lifetimes = get_eddy_lifetimes(ant_eddy_counts, anticyclonic_tracks);
     ant_eddy_track_indexes = get_eddy_track_index(ant_eddy_counts, anticyclonic_tracks);
-
+    
     attribute_to_save = {'amps', 'geospeeds', 'lats', 'lons', 'pxcounts', 'surface_areas', 'lifetimes', 'eddy_track_indexes', 'types'};
     for i = 1:length(attribute_to_save)
         curr_attribute = attribute_to_save{i};

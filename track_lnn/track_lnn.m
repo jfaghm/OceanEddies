@@ -6,6 +6,20 @@ function [ tracks ] = track_lnn( eddies_path, type, time_frequency )
 % Input:
 %   eddies: cell array of eddies resulting from eddyscan
 %   times_frequency: number of days between 2 timesteps
+%
+% Understanding the columns of the tracks
+% Column 1 is the latitude of the centroid of the eddy
+% Column 2 is the longitude of the centroid of the eddy
+% Column 3 is the time slice (day) that the eddy is from. To use this data to
+% get the actual day that the eddy is from, use this value as an index to a
+% dates array, and the return value of your dates array will be the day the
+% eddy is from.
+% Column 4 is the index in the struct array of eddies for that particular
+% day. If you get the correct eddies struct that corresponds to the date in
+% column 3, the value in this column is the index in that struct where this
+% actual eddy resides. It is through getting the appropriate struct and
+% accessing the appropriate entry that we relate this track data to actual
+% eddies in the struct.
 
 %% Setting constants
 temp = load('rossby_daily_phase_speeds.mat');

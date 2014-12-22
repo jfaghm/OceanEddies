@@ -146,6 +146,8 @@ else
 end
 save([tracks_save_path, 'anticyclonic_tracks.mat'], 'anticyclonic_tracks');
 save([tracks_save_path, 'cyclonic_tracks.mat'], 'cyclonic_tracks');
+eddies_t = reformat_track_data_to_chelton(eddies_save_path, dates, anticyclonic_tracks, cyclonic_tracks);%#ok
+save([tracks_save_path, 'chelton_structured_tracks.mat'], 'eddies_t');
 % Set up data for viewer
 disp('Preparing data for viewer');
 prepare_eddy_data_for_viewer(viewer_data_save_path, dates, eddies_save_path, cyclonic_tracks, anticyclonic_tracks, ssh_path);
