@@ -4,8 +4,10 @@ function [ tracks ] = track_lnn( eddies_path, type, time_frequency )
 %   that qualifies some conditions to be stitched to current eddy. The north, south and east bounds are the gate
 %   distance while the west bound is computed based on rossby-phase_speed.
 % Input:
-%   eddies: cell array of eddies resulting from eddyscan
-%   times_frequency: number of days between 2 timesteps
+%   eddies_path: path pointing to a directory where eddies resulting from
+%   eddyscan can be found
+%   type: 'anticyc' or 'cyclonic'
+%   time_frequency: number of days between 2 timesteps
 %
 % Understanding the columns of the tracks
 % Column 1 is the latitude of the centroid of the eddy

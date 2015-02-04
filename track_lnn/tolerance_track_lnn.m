@@ -14,7 +14,7 @@ function [tracks, revived, dropped_criteria, dropped_vicinity] = tolerance_track
 % Input:
 %   eddies_path: The path to the directory where eddies that were detected
 %                by eddyscan were saved
-%   type: Cyclone type of eddies ('anticyclonic' or 'cyclonic')
+%   type: Cyclone type of eddies ('anticyc' or 'cyclonic')
 %   time_frequency: Number of days between timesteps. For weekly data, put
 %                   7, for daily data, put 1
 %   tolerance: Number of timesteps an eddy can be lost for
