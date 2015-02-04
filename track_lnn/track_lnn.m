@@ -2,7 +2,7 @@ function [ tracks ] = track_lnn( eddies_path, type, time_frequency )
 %TRACK_LNN Tracking eddies by lnn method
 %   For each eddy in a timestep, all eddies in next timestep within a boundary are checked to see if there's an eddy
 %   that qualifies some conditions to be stitched to current eddy. The north, south and east bounds are the gate
-%   distance while the west boudn is computed based on rossby-phase_speed.
+%   distance while the west bound is computed based on rossby-phase_speed.
 % Input:
 %   eddies: cell array of eddies resulting from eddyscan
 %   times_frequency: number of days between 2 timesteps
