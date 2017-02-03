@@ -32,11 +32,10 @@ echo "CREATE TABLE eddies (
 	track_id INTEGER NOT NULL, 
 	lat FLOAT NOT NULL, 
 	lon FLOAT NOT NULL, 
-	amplitude FLOAT NOT NULL, 
-	thresh_found FLOAT NOT NULL, 
-	surface_area FLOAT NOT NULL, 
 	date INTEGER NOT NULL, 
-	cyc INTEGER NOT NULL, 
+	surface_area FLOAT NOT NULL, 
+	amplitude FLOAT NOT NULL, 
+	radius FLOAT NOT NULL, 
 	mean_geo_speed FLOAT NOT NULL
 );" | psql ocean_eddies
 
