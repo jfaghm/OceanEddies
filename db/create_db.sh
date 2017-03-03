@@ -61,3 +61,62 @@ psql ocean_eddies -c 'CREATE INDEX ON eddies USING GIST(geom);'
 
 psql ocean_eddies -c "ALTER TABLE eddies DROP COLUMN lat;"
 psql ocean_eddies -c "ALTER TABLE eddies DROP COLUMN lon;"
+
+
+echo "Adding hurricane data..."
+
+if [ ! -f data/atlantic_storms.csv ]; then
+	wget -O data/atlantic_storms.csv "https://raw.githubusercontent.com/ResidentMario/hurdat2/master/data/atlantic_storms.csv"
+fi
+
+if [ ! -f data/pacific_storms.csv ]; then
+	wget -O data/pacific_storms.csv "https://raw.githubusercontent.com/ResidentMario/hurdat2/master/data/pacific_storms.csv"
+fi
+
+echo "
+	DROP TABLE IF EXISTS atlantic_storms;
+	DROP TABLE IF EXISTS pacific_storms;
+" | psql ocean_eddies
+
+echo "CREATE TABLE atlantic_storms (
+	index INTEGER, 
+	id VARCHAR(8), 
+	name VARCHAR(10), 
+	date TIMESTAMP WITHOUT TIME ZONE, 
+	record_identifier TEXT, 
+	status_of_system TEXT, 
+	latitude FLOAT, 
+	longitude FLOAT, 
+	maximum_sustained_wind_knots INTEGER, 
+	maximum_pressure INTEGER, 
+	kt_ne_34 INTEGER, 
+	kt_se_34 INTEGER, 
+	kt_sw_34 INTEGER, 
+	kt_nw_34 INTEGER, 
+	kt_ne_50 INTEGER, 
+	kt_se_50 INTEGER, 
+	kt_sw_50 INTEGER, 
+	kt_nw_50 INTEGER, 
+	kt_ne_64 INTEGER, 
+	kt_se_64 INTEGER, 
+	kt_sw_64 INTEGER, 
+	kt_nw_64 INTEGER
+);" | psql ocean_eddies
+
+psql ocean_eddies -c "CREATE TABLE pacific_storms AS (SELECT * FROM atlantic_storms);"
+
+psql ocean_eddies -c "\\copy atlantic_storms FROM '$(pwd)/data/atlantic_storms.csv' WITH CSV HEADER;"
+psql ocean_eddies -c "\\copy pacific_storms FROM '$(pwd)/data/pacific_storms.csv' WITH CSV HEADER;"
+
+echo "
+	SELECT AddGeometryColumn ('public','atlantic_storms','geom',4326,'POINT',2);
+	SELECT AddGeometryColumn ('public','pacific_storms','geom',4326,'POINT',2);
+	UPDATE atlantic_storms SET geom=ST_GeomFromText('POINT(' || longitude || ' ' || latitude || ')', 4326);
+	UPDATE pacific_storms SET geom=ST_GeomFromText('POINT(' || longitude || ' ' || latitude || ')', 4326);
+	CREATE INDEX ON atlantic_storms USING GIST(geom);
+	CREATE INDEX ON pacific_storms USING GIST(geom);
+" | psql ocean_eddies
+
+
+
+
