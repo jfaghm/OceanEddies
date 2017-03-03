@@ -113,10 +113,15 @@ echo "
 	SELECT AddGeometryColumn ('public','pacific_storms','geom',4326,'POINT',2);
 	UPDATE atlantic_storms SET geom=ST_GeomFromText('POINT(' || longitude || ' ' || latitude || ')', 4326);
 	UPDATE pacific_storms SET geom=ST_GeomFromText('POINT(' || longitude || ' ' || latitude || ')', 4326);
-	CREATE INDEX ON atlantic_storms USING GIST(geom);
-	CREATE INDEX ON pacific_storms USING GIST(geom);
 " | psql ocean_eddies
 
-
+echo "
+	DROP TABLE IF EXISTS storms;
+	CREATE TABLE storms AS SELECT * FROM atlantic_storms;
+	INSERT INTO storms SELECT * FROM pacific_storms;
+	CREATE INDEX ON storms USING GIST(geom);
+	DROP TABLE atlantic_storms;
+	DROP TABLE pacific_storms;
+" | psql ocean_eddies
 
 
