@@ -24,6 +24,26 @@ lon(lon >= 180) = lon(lon >= 180)-360;
 load('../data/quadrangle_area_by_lat.mat'); % Load areamap to compute eddies' surface areas
 eddies = scan_single(ssh_slice, lat, lon, 'anticyc', 'v2', areamap);
 ```
+## `scan_single(ssh,lat,lon,areamap,cyc,scan_type,...)`
+
+##### Required arguments
+
+1. `ssh` - ssh slice with nans for land, size should be `[length(lat) length(lon)]`
+2. `lat` - 1D array of the latitudes of ssh grid
+3. `lon` - 1D array of the longitudes of ssh grid
+4. `cyc` - `'anticyc'` or `'cyclonic'`
+5. `scan_type` -  `'v1'`, `'v2'`, `'hybrid'`
+  - v1: Will run top-down scanning (only works with full data of 0.25 x 0.25 ssh grid)
+  - v2: Will run bottom-up scanning from the minima of the field
+  - hybrid: Will run v2 and v1 scanning and will take the union of the two sets where, for common features, v2 bodies will be used
+6. `areamap` - A 2D array that refer to the area of each pixel in SSH data (should have same size as ssh), or 1D array that refer to area of each pixel for a specific lat in a regular grid (pixeld have same area for the same latitude)
+
+##### Optional parameters (only applicable for v2 eddyscan):
+
+1. `'minimumArea'` - minimum number of pixels for an eddy, used for validating eddies, default value is `9`
+2. `'thresholdStep'` - the minimum step for thresholding, the unit is SSH's unit, default value is `0.05`
+3. `'isPadding'` - whether or not to pad SSH data, should be true when scanning SSH data with the longitudes expanding the whole world dmap. Set to false if only partial SSH data is used. Default value is true
+
 
 ## LNN
 A tracking algorithm (surpassed by MHA) for eddies.
