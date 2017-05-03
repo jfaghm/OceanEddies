@@ -26,6 +26,8 @@ eddies = scan_single(ssh_slice, lat, lon, 'anticyc', 'v2', areamap);
 ```
 ## `scan_single(ssh,lat,lon,areamap,cyc,scan_type,...)`
 
+Detect all eddies for a particular timestamp.
+
 ##### Required arguments
 
 1. `ssh` - ssh slice with nans for land, size should be `[length(lat) length(lon)]`
@@ -35,7 +37,7 @@ eddies = scan_single(ssh_slice, lat, lon, 'anticyc', 'v2', areamap);
 5. `scan_type` -  `'v1'`, `'v2'`, `'hybrid'`
   - v1: Will run top-down scanning (only works with full data of 0.25 x 0.25 ssh grid)
   - v2: Will run bottom-up scanning from the minima of the field
-  - hybrid: Will run v2 and v1 scanning and will take the union of the two sets where, for common features, v2 bodies will be used
+  - hybrid: Will run `v2` and `v1` scanning and will take the union of the two sets where, for common features, `v2` bodies will be used
 6. `areamap` - A 2D array that refer to the area of each pixel in SSH data (should have same size as ssh), or 1D array that refer to area of each pixel for a specific lat in a regular grid (pixeld have same area for the same latitude)
 
 ##### Optional parameters (only applicable for v2 eddyscan):
@@ -43,6 +45,28 @@ eddies = scan_single(ssh_slice, lat, lon, 'anticyc', 'v2', areamap);
 1. `'minimumArea'` - minimum number of pixels for an eddy, used for validating eddies, default value is `9`
 2. `'thresholdStep'` - the minimum step for thresholding, the unit is SSH's unit, default value is `0.05`
 3. `'isPadding'` - whether or not to pad SSH data, should be true when scanning SSH data with the longitudes expanding the whole world dmap. Set to false if only partial SSH data is used. Default value is true
+4. `'sshUnits'` -  The units the SSH data is in. bottom_up_single is built to work natively on centimeter SSH data.  Valid parameters are `'meters'` and `'centimeters'`. If the paramater passed in is `'meters'`, the SSH data will be multiplied by 100. No changes will be made if the paramater passed in is `'centimeters'`.  The default value of 'sshUnits' is centimeters.
+
+## `scan_multi(ssh,lat,lon,areamap,cyc,scan_type,destdir,...)`
+
+Detect all eddies for all time steps.  Results are saved to disk as specified by the `destdir` paramter.
+
+##### Required arguments
+
+1. `ssh` - ssh cube with nans for land
+2. `lat` - A 1D array of double's that gives the latitude for a given index in ssh data , should be equal to `size(ssh, 1)`
+3. `lon` - A 1D array of double's that gives the longitude for a given index in ssh data, should be equal to `size(ssh, 2)`
+4. `dates` - A 1D array of the dates of ssh data, length should be equal to `size(ssh, 3)`
+5. `cyc` - `'anticyc'` or `'cyclonic'`
+6. `scan_type` - `'v1'`, `'v2'`, `'hybrid'`
+  - v1: Will run top-down scanning
+  - v2: Will run bottom-up scanning from the minima of the field
+  - hybrid: Will run `v2` and `v1` scanning and will take the union of the two sets where, for common features, `v2` bodies will be used
+7. `destdir` - destination directory to save eddies
+
+##### Optional parameters:
+
+Same as `scan_single`
 
 
 ## LNN
