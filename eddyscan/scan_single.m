@@ -17,6 +17,11 @@ function [ eddies ] = scan_single( ssh, lat, lon, date, cyc, scan_type, areamap,
 %   'thresholdStep': the minimum step for thresholding, the unit is SSH's unit, default value is 0.05
 %   'isPadding': whether or not to pad SSH data, should be true when scanning SSH data with the longitudes expanding the 
 %   whole world dmap. Set to false if only partial SSH data is used. Default value is true
+%   'sshUnits': The units the SSH data is in. bottom_up_single is built to work natively on centimeter SSH data.
+%   Valid parameters are 'meters' and 'centimeters'. If the paramater passed in is 'meters', the SSH data will
+%   be multiplied by 100. No changes will be made if the paramater passed in is 'centimeters'.
+%   The default value of 'sshUnits' is centimeters.
+
     if ~any(isnan(ssh(:)))
         error('Invalid ssh data, must contain NaNs for land values');
     end
