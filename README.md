@@ -1,6 +1,6 @@
 # OceanEddies
 A collection of algorithms to autonomously identify and track mesoscale ocean
-eddies in sea surface height (SSH) satellite data
+eddies in sea surface height (SSH) satellite data. For immediate support email Ivy Frenger (ifrenger@geomar.de).
 
 ## Eddyscan
 An eddy identification algorithm that utilizes thresholding to detect eddies in
